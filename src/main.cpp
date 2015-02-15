@@ -49,7 +49,7 @@ int main( void )
   glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
   //Load in shaders
-  static ShaderProgram prog("../vertShader.vert", "../fragShader.frag");
+  static ShaderProgram prog("../../vertShader.vert", "../../fragShader.frag");
    
   do{
 
