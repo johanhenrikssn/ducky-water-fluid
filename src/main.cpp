@@ -21,6 +21,7 @@
 
 #include <common/Init.h>
 #include <common/Shader.h>
+#include "Particle.h"
 
 using namespace glm;
 
