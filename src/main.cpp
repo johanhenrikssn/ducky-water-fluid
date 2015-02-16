@@ -6,7 +6,7 @@
 #ifdef __APPLE_CC__
 #include <OpenGL/gl3.h>
 #define GLFW_INCLUDE_GLCOREARB
-#else 
+#else
 #include <GL/glew.h>
 #endif
 
@@ -26,48 +26,86 @@ using namespace glm;
 
 int main( void )
 {
-  
-  //Create init object
-  Init init = Init();
-
-  //Initialize glfw
-  init.glfw(4,1);
-
-  //Open a window
-  GLFWwindow* window = init.window();
-  glfwSetWindowTitle(window, "Ducky Water");
-  //Print window info
-  init.printWindowInfo(window);
-
-  //Make opened window current context
-  glfwMakeContextCurrent(window);
-
-  
-  init.glew();
-
-  // Dark blue background
-  glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-
-  //Load in shaders
-  static ShaderProgram prog("../../vertShader.vert", "../../fragShader.frag");
-   
-  do{
-
-
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-    glClear(GL_COLOR_BUFFER_BIT);
-    prog();
-
-   
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  } // Check if the ESC key was pressed or the window was closed
-  while( !glfwWindowShouldClose(window) );
-
-  // Close OpenGL window and terminate GLFW
-  glfwDestroyWindow(window);
-  glfwTerminate();
-  
+    
+    //Create init object
+    Init init = Init();
+    
+    //Initialize glfw
+    init.glfw(4,1);
+    
+    //Open a window
+    GLFWwindow* window = init.window();
+    
+    //Window title
+    glfwSetWindowTitle(window, "Ducky Water");
+    
+    //Print window info
+    init.printWindowInfo(window);
+    
+    //Make opened window current context
+    glfwMakeContextCurrent(window);
+    
+    
+    init.glew();
+    
+    // Dark blue background
+    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+    
+    //Load in shaders
+    static ShaderProgram prog("../../vertShader.vert", "../../fragShader.frag");
+    
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+    
+    static const GLfloat g_vertex_buffer_data[] = {
+        -0.7f, -0.7f, 0.0f,
+        0.7f, -0.7f, 0.0f,
+        0.7f, 0.7f, 0.0f,
+        -0.7f, 0.7f, 0.0f,
+    };
+    
+    GLuint vertexbuffer;
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    
+    
+    do{
+        
+        
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+        prog();
+        
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+                              0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                              3,                  // size
+                              GL_FLOAT,           // type
+                              GL_FALSE,           // normalized?
+                              0,                  // stride
+                              (void*)0            // array buffer offset
+                              );
+        
+        // Draw the triangle !
+        glDrawArrays(GL_LINE_LOOP, 0, 4); // 6 indices starting at 0 -> 1 triangle
+        
+        glDisableVertexAttribArray(0);
+        
+        
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    } // Check if the ESC key was pressed or the window was closed
+    while( !glfwWindowShouldClose(window) );
+    
+    // Close OpenGL window and terminate GLFW
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    glDeleteBuffers(1, &vertexbuffer);
+    glDeleteVertexArrays(1, &VertexArrayID);
+    exit(EXIT_SUCCESS);
 }
