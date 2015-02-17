@@ -22,9 +22,10 @@
 #include <common/Init.h>
 #include <common/Shader.h>
 //#include "shader.hpp"
+
 #include "controls.hpp"
 const int MaxParticles = 10000;
-
+GLFWwindow* window;
 
 
 struct Particle{
@@ -81,7 +82,7 @@ int main( void )
     init.glfw(4,1);
     
     //Open a window
-    GLFWwindow* window = init.window();
+    window = init.window();
     
     //Window title
     glfwSetWindowTitle(window, "Ducky Water");
@@ -106,9 +107,6 @@ int main( void )
     GLuint CameraUp_worldspace_ID  = glGetUniformLocation(prog, "CameraUp_worldspace");
     GLuint ViewProjMatrixID = glGetUniformLocation(prog, "VP");
     
-   
-
-
     
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
@@ -143,10 +141,8 @@ int main( void )
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
     static const GLfloat g_vertex_buffer_data[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+
     };
     GLuint billboard_vertex_buffer;
     glGenBuffers(1, &billboard_vertex_buffer);
@@ -170,8 +166,6 @@ int main( void )
     double lastTime = glfwGetTime();
     
     do{
-        
-        
         
         
         int width, height;
@@ -206,7 +200,7 @@ int main( void )
         for(int i=0; i<newparticles; i++){
             int particleIndex = FindUnusedParticle();
             ParticlesContainer[particleIndex].life = 20.0f; // This particle will live 5 seconds.
-            ParticlesContainer[particleIndex].pos = glm::vec2(0,-0.5f);
+            ParticlesContainer[particleIndex].pos = glm::vec2(0, 1.0f);
             
             float spread = 0.5f;
             glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
@@ -242,11 +236,13 @@ int main( void )
                 p.life -= delta;
                 if (p.life > 0.0f){
                     
-                    // Simulate simple physics : gravity only, no collisions
-                    p.speed += glm::vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
-                    p.pos += p.speed * (float)delta;
-                    p.cameradistance = length( p.pos - CameraPosition );
-                    ParticlesContainer[i].pos += glm::vec2(0.0f,0.50f) * (float)delta;
+                
+                        // Simulate simple physics : gravity only, no collisions
+                        p.speed -= glm::vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+                        p.pos += p.speed * (float)delta;
+                        p.cameradistance = length( p.pos - CameraPosition );
+                        ParticlesContainer[i].pos -= glm::vec2(0.0f,0.50f) * (float)delta;
+                    
                     
                     // Fill the GPU buffer
                     g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
@@ -269,6 +265,7 @@ int main( void )
                 
             }
         }
+        
         
         SortParticles();
         
@@ -347,7 +344,8 @@ int main( void )
         glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
         glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
         glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
-        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
+        glDrawArraysInstanced(GL_POINTS, 0, 1, ParticlesCount);
+        glEnable(GL_PROGRAM_POINT_SIZE);
         
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
