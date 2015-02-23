@@ -31,42 +31,11 @@ GLFWwindow* window;
 struct Particle{
     glm::vec2 pos, speed;
     unsigned char r,g,b,a; // Color
-    float size, angle, weight;
-    float life; // Remaining life of the particle. if <0 : dead and unused.
-    float cameradistance; // *Squared* distance to the camera. if dead : -1.0f
-    
-    bool operator<(const Particle& that) const {
-        // Sort in reverse order : far particles drawn first.
-        return this->cameradistance > that.cameradistance;
-    }
+    float size;
     
    };
+
 Particle ParticlesContainer[MaxParticles];
-int LastUsedParticle = 0;
-
-int FindUnusedParticle(){
-    
-    for(int i=LastUsedParticle; i<MaxParticles; i++){
-        if (ParticlesContainer[i].life < 0){
-            LastUsedParticle = i;
-            return i;
-        }
-    }
-    
-    for(int i=0; i<LastUsedParticle; i++){
-        if (ParticlesContainer[i].life < 0){
-            LastUsedParticle = i;
-            return i;
-        }
-    }
-    
-    return 0; // All particles are taken, override the first one
-}
-
-
-void SortParticles(){
-    std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
-}
 
 
 using namespace glm;
@@ -122,13 +91,6 @@ int main( void )
         -0.7f, 0.7f, 0.0f,
     };
     
-    for(int i=0; i<MaxParticles; i++){
-        ParticlesContainer[i].life = -1.0f;
-        ParticlesContainer[i].cameradistance = -1.0f;
-    }
-
-    
-
     
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
@@ -163,7 +125,34 @@ int main( void )
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
     glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
     
+    int newparticles = 10000;
     double lastTime = glfwGetTime();
+    
+    
+    for(int i=0; i<newparticles; i++){
+        
+        int particleIndex = i;
+        
+        ParticlesContainer[particleIndex].pos = glm::vec2((rand()%2000 - 1000.0f)/10000.0f, 1.0f);
+        
+        
+        glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
+        
+        ParticlesContainer[particleIndex].speed = maindir;
+        
+        
+        // Very bad way to generate a random color
+        ParticlesContainer[particleIndex].r = rand() % 256;
+        ParticlesContainer[particleIndex].g = rand() % 256;
+        ParticlesContainer[particleIndex].b = rand() % 256;
+        ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
+        
+        ParticlesContainer[particleIndex].size = 0.1f;
+        
+        
+        
+    }
+    
     
     do{
         
@@ -190,58 +179,25 @@ int main( void )
         
         glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
-     
+    
         
-        
-        int newparticles = (int)(delta*10000.0);
-        if (newparticles > (int)(0.016f*10000.0))
-            newparticles = (int)(0.016f*10000.0);
-        
-        for(int i=0; i<newparticles; i++){
-            int particleIndex = FindUnusedParticle();
-            ParticlesContainer[particleIndex].life = 20.0f; // This particle will live 5 seconds.
-            ParticlesContainer[particleIndex].pos = glm::vec2(0, 1.0f);
-            
-            float spread = 0.5f;
-            glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
-            // Very bad way to generate a random direction;
-            // See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
-            // combined with some user-controlled parameters (main direction, spread, etc)
-            glm::vec2 randomdir = glm::vec2(
-                                            (rand()%2000 - 1000.0f)/10000.0f,
-                                            (rand()%2000 - 1000.0f)/10000.0f
-                                            );
-            
-            ParticlesContainer[particleIndex].speed = maindir + randomdir*spread;
-            
-            
-            // Very bad way to generate a random color
-            ParticlesContainer[particleIndex].r = rand() % 256;
-            ParticlesContainer[particleIndex].g = rand() % 256;
-            ParticlesContainer[particleIndex].b = rand() % 256;
-            ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
-            
-            ParticlesContainer[particleIndex].size = 0.1f;
-            
-        }
+        //newparticles = 0;
 
         int ParticlesCount = 0;
         for(int i=0; i<MaxParticles; i++){
             
             Particle& p = ParticlesContainer[i]; // shortcut
+     
+                    // Simulate simple physics : gravity only, no collisions
             
-            if(p.life > 0.0f){
-                
-                // Decrease life
-                p.life -= delta;
-                if (p.life > 0.0f){
+            
+                    p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+                    p.pos += p.speed * (float)delta;
+            
+                    ParticlesContainer[i].pos -= vec2(0.0f,0.50f) * (float)delta;
+            
+            
                     
-                
-                        // Simulate simple physics : gravity only, no collisions
-                        p.speed -= glm::vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
-                        p.pos += p.speed * (float)delta;
-                        p.cameradistance = length( p.pos - CameraPosition );
-                        ParticlesContainer[i].pos -= glm::vec2(0.0f,0.50f) * (float)delta;
                     
                     
                     // Fill the GPU buffer
@@ -255,19 +211,12 @@ int main( void )
                     g_particule_color_data[4*ParticlesCount+1] = p.g;
                     g_particule_color_data[4*ParticlesCount+2] = p.b;
                     g_particule_color_data[4*ParticlesCount+3] = p.a;
-                    
-                }else{
-                    // Particles that just died will be put at the end of the buffer in SortParticles();
-                    p.cameradistance = -1.0f;
-                }
+            
                 
                 ParticlesCount++;
                 
             }
-        }
-        
-        
-        SortParticles();
+    
         
         
         printf("%d ",ParticlesCount);
