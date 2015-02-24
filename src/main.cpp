@@ -24,6 +24,7 @@
 #include <common/Shader.h>
 #include "Box.h"
 #include "ParticleSystem.h"
+#include "Grid.h"
 
 
 GLFWwindow* window;
