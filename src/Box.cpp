@@ -26,9 +26,9 @@
 #include <iostream>
 
 
-bool Box::drawBox()
+void Box::drawBox()
 {
-    static const GLfloat g_vertex_buffer_data1[] = {
+    static const GLfloat Boxvertices[] = {
         
         -0.7f, 0.7f, 0.0f,
         
@@ -42,7 +42,7 @@ bool Box::drawBox()
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Boxvertices), Boxvertices, GL_STATIC_DRAW);
     
     
     glEnableVertexAttribArray(0);
@@ -60,4 +60,5 @@ bool Box::drawBox()
     glDrawArrays(GL_LINE_STRIP, 0, 4);
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &vertexbuffer);
+    
 }

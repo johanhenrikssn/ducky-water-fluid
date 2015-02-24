@@ -14,7 +14,7 @@ class Box
 {
     public:
     Box() {};
-    bool drawBox();
+    void drawBox();
     
 };
 #endif /* defined(__Ducky_Water__Box__) */

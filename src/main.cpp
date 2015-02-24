@@ -144,7 +144,6 @@ int main( void )
         
         ParticlesContainer[particleIndex].size = 0.1f;
         
-        boxen = Box();
     }
     
     do{
