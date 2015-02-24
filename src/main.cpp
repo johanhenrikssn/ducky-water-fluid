@@ -81,7 +81,7 @@ int main( void )
     glm::mat4 ProjectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
     // Camera matrix
     glm::mat4 ViewMatrix       = glm::lookAt(
-                                       glm::vec3(4,3,-3), // Camera is at (4,3,-3), in World Space
+                                       glm::vec3(0,0,-3), // Camera is at (0    ,0,-3), in World Space
                                        glm::vec3(0,0,0), // and looks at the origin
                                        glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                        );
@@ -98,10 +98,14 @@ int main( void )
     static GLubyte* g_particule_color_data         = new GLubyte[MaxParticles * 4];
     
     static const GLfloat g_vertex_buffer_data1[] = {
-        -0.7f, -0.7f, 0.0f,
-        0.7f, -0.7f, 0.0f,
-        0.7f, 0.7f, 0.0f,
+       
         -0.7f, 0.7f, 0.0f,
+        
+        -0.7f, -0.7f, 0.0f,
+        
+        0.7f, -0.7f, 0.0f,
+        
+        0.7f, 0.7f, 0.0f,
     };
     
     GLuint vertexbuffer;
@@ -166,7 +170,21 @@ int main( void )
         double delta = currentTime - lastTime;
         lastTime = currentTime;
 
-        //newparticles = 0;
+        
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+                              0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                              3,                  // size
+                              GL_FLOAT,           // type
+                              GL_FALSE,           // normalized?
+                              0,                  // stride
+                              (void*)0            // array buffer offset
+                              );
+        
+        
+        glDrawArrays(GL_LINE_STRIP, 0, 4);
+        glDisableVertexAttribArray(0);
 
         int ParticlesCount = 0;
         for(int i=0; i<MaxParticles; i++){
@@ -175,28 +193,48 @@ int main( void )
      
             // Simulate simple physics : gravity only, no collisions
             
+            if(p.pos.y > -0.68f && p.pos.x < 0.68f && p.pos.x > -0.68f)
+            {
+                p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+                p.pos += p.speed * (float)delta;
             
-            p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
-            p.pos += p.speed * (float)delta;
+                ParticlesContainer[i].pos -= vec2(0.0f,0.50f) * (float)delta;
             
-            ParticlesContainer[i].pos -= vec2(0.0f,0.50f) * (float)delta;
-            
-            // Fill the GPU buffer
-            g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
-            g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
+             
+                g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
+                g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
             
             
-            g_particule_position_size_data[4*ParticlesCount+3] = p.size;
             
-            g_particule_color_data[4*ParticlesCount+0] = p.r;
-            g_particule_color_data[4*ParticlesCount+1] = p.g;
-            g_particule_color_data[4*ParticlesCount+2] = p.b;
-            g_particule_color_data[4*ParticlesCount+3] = p.a;
+                g_particule_position_size_data[4*ParticlesCount+3] = p.size;
             
-            ParticlesCount++;
+                g_particule_color_data[4*ParticlesCount+0] = p.r;
+                g_particule_color_data[4*ParticlesCount+1] = p.g;
+                g_particule_color_data[4*ParticlesCount+2] = p.b;
+                g_particule_color_data[4*ParticlesCount+3] = p.a;
+            
+                ParticlesCount++;
+                 
+            }
+            else
+            {
+                p.speed = vec2(0.0f, 0.0f);
+                g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
+                g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
+                
+                
+                
+                g_particule_position_size_data[4*ParticlesCount+3] = p.size;
+                
+                g_particule_color_data[4*ParticlesCount+0] = p.r;
+                g_particule_color_data[4*ParticlesCount+1] = p.g;
+                g_particule_color_data[4*ParticlesCount+2] = p.b;
+                g_particule_color_data[4*ParticlesCount+3] = p.a;
+                ParticlesCount++;
+            }
         }
         
-        printf("%d ",ParticlesCount);
+       
         
        	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
         glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
@@ -213,12 +251,6 @@ int main( void )
         // Use our shader
         glUseProgram(prog);
         
-        // Bind our texture in Texture Unit 0
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, Texture);
-        // Set our "myTextureSampler" sampler to user Texture Unit 0
-       // glUniform1i(TextureID, 0);
-
         // Same as the billboards tutorial
         glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
         glUniform3f(CameraUp_worldspace_ID   , ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
