@@ -10,7 +10,7 @@
 
 
 
-void ParticleSystem::initParticleSystem() {
+void ParticleSystem::initParticles() {
     
     int newparticles = 10000;
     
@@ -63,7 +63,7 @@ void ParticleSystem::initBufferData(){
     
 }
 
-int ParticleSystem::updateParticleSystem(double delta){
+int ParticleSystem::updateParticles(double delta){
     
     g_particule_position_size_data = new GLfloat[MaxParticles * 4];
     static GLubyte* g_particule_color_data         = new GLubyte[MaxParticles * 4];
@@ -166,7 +166,7 @@ int ParticleSystem::updateParticleSystem(double delta){
     
 }
 
-void ParticleSystem::clearParticleSystem(){
+void ParticleSystem::clean(){
     delete[] g_particule_position_size_data;
     
     glDeleteBuffers(1, &particles_color_buffer);

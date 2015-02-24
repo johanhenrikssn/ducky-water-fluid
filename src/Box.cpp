@@ -26,7 +26,7 @@
 #include <iostream>
 
 
-void Box::drawBox()
+void Box::draw()
 {
     static const GLfloat Boxvertices[] = {
         

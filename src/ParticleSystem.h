@@ -24,9 +24,9 @@ using namespace glm;
 const int MaxParticles = 10000;
 
 struct Particle{
-    vec2 pos, speed;
+    vec2 pos, speed, force;
     unsigned char r,g,b,a; // Color
-    float size;
+    float size, pressure;
     
 };
 
@@ -41,14 +41,12 @@ class ParticleSystem{
         GLuint billboard_vertex_buffer;
         GLfloat* g_particule_position_size_data;
     
-        void initParticleSystem();
-        void clearParticleSystem();
-        int updateParticleSystem(double delta);
+        void initParticles();
+        void clean();
+        int updateParticles(double delta);
         void initBufferData();
     
     
-    
-
     
 };
 

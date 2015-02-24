@@ -13,8 +13,7 @@
 class Box
 {
     public:
-    Box() {};
-    void drawBox();
+        void draw();
     
 };
 #endif /* defined(__Ducky_Water__Box__) */

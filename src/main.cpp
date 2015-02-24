@@ -29,15 +29,12 @@
 GLFWwindow* window;
 
 ParticleSystem particleSystem;
-
-Particle ParticlesContainer[MaxParticles];
-Box boxen;
+Box box;
 
 using namespace glm;
 
 int main( void )
 {
-    
     
     //Create init object
     Init init = Init();
@@ -94,7 +91,7 @@ int main( void )
     particleSystem.initBufferData();
     
     double lastTime = glfwGetTime();
-    particleSystem.initParticleSystem();
+    particleSystem.initParticles();
     
     do{
         int width, height;
@@ -106,9 +103,9 @@ int main( void )
         double delta = currentTime - lastTime;
         lastTime = currentTime;
         
-        boxen.drawBox();
+        box.draw();
 
-        int ParticlesCount = particleSystem.updateParticleSystem(delta);
+        int ParticlesCount = particleSystem.updateParticles(delta);
         
         
     
@@ -127,7 +124,6 @@ int main( void )
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
         
       
-        
         
         // These functions are specific to glDrawArrays*Instanced*.
         // The first parameter is the attribute buffer we're talking about.
@@ -156,7 +152,7 @@ int main( void )
     
     // Close OpenGL window and terminate GLFW
     
-    particleSystem.clearParticleSystem();
+    particleSystem.clean();
     glfwDestroyWindow(window);
     glfwTerminate();
     
