@@ -17,13 +17,13 @@
 
 // Include GLM
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 #include <common/Init.h>
 #include <common/Shader.h>
 //#include "shader.hpp"
 
-#include "controls.hpp"
 const int MaxParticles = 10000;
 GLFWwindow* window;
 
@@ -62,7 +62,6 @@ int main( void )
     //Make opened window current context
     glfwMakeContextCurrent(window);
     
-    
     init.glew();
     
     // Dark blue background
@@ -74,9 +73,23 @@ int main( void )
     
     GLuint CameraRight_worldspace_ID  = glGetUniformLocation(prog, "CameraRight_worldspace");
     GLuint CameraUp_worldspace_ID  = glGetUniformLocation(prog, "CameraUp_worldspace");
-    GLuint ViewProjMatrixID = glGetUniformLocation(prog, "VP");
     
+    // Get a handle for our "MVP" uniform
+    GLuint MatrixID = glGetUniformLocation(prog, "MVP");
     
+    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    glm::mat4 ProjectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+    // Camera matrix
+    glm::mat4 ViewMatrix       = glm::lookAt(
+                                       glm::vec3(4,3,-3), // Camera is at (4,3,-3), in World Space
+                                       glm::vec3(0,0,0), // and looks at the origin
+                                       glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                                       );
+    // Model matrix : an identity matrix (model will be at the origin)
+    glm::mat4 Model      = glm::mat4(1.0f);
+    // Our ModelViewProjection : multiplication of our 3 matrices
+    glm::mat4 MVP        = ProjectionMatrix * ViewMatrix * Model; // Remember, matrix multiplication is the other way around
+
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
@@ -91,15 +104,11 @@ int main( void )
         -0.7f, 0.7f, 0.0f,
     };
     
-    
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);
     
-    
-    
-  
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
     static const GLfloat g_vertex_buffer_data[] = {
@@ -130,16 +139,13 @@ int main( void )
     
     
     for(int i=0; i<newparticles; i++){
-        
         int particleIndex = i;
         
         ParticlesContainer[particleIndex].pos = glm::vec2((rand()%2000 - 1000.0f)/10000.0f, 1.0f);
         
-        
         glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
         
         ParticlesContainer[particleIndex].speed = maindir;
-        
         
         // Very bad way to generate a random color
         ParticlesContainer[particleIndex].r = rand() % 256;
@@ -148,15 +154,9 @@ int main( void )
         ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
         
         ParticlesContainer[particleIndex].size = 0.1f;
-        
-        
-        
     }
     
-    
     do{
-        
-        
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
@@ -165,22 +165,7 @@ int main( void )
         double currentTime = glfwGetTime();
         double delta = currentTime - lastTime;
         lastTime = currentTime;
-        
-        
-        computeMatricesFromInputs();
-        glm::mat4 ProjectionMatrix = getProjectionMatrix();
-        glm::mat4 ViewMatrix = getViewMatrix();
-        
-        // We will need the camera's position in order to sort the particles
-        // w.r.t the camera's distance.
-        // There should be a getCameraPosition() function in common/controls.cpp,
-        // but this works too.
-        glm::vec2 CameraPosition(glm::inverse(ViewMatrix)[3]);
-        
-        glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
-    
-        
         //newparticles = 0;
 
         int ParticlesCount = 0;
@@ -188,36 +173,28 @@ int main( void )
             
             Particle& p = ParticlesContainer[i]; // shortcut
      
-                    // Simulate simple physics : gravity only, no collisions
+            // Simulate simple physics : gravity only, no collisions
             
             
-                    p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
-                    p.pos += p.speed * (float)delta;
+            p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+            p.pos += p.speed * (float)delta;
             
-                    ParticlesContainer[i].pos -= vec2(0.0f,0.50f) * (float)delta;
+            ParticlesContainer[i].pos -= vec2(0.0f,0.50f) * (float)delta;
+            
+            // Fill the GPU buffer
+            g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
+            g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
             
             
-                    
-                    
-                    
-                    // Fill the GPU buffer
-                    g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
-                    g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
-                    
-                    
-                    g_particule_position_size_data[4*ParticlesCount+3] = p.size;
-                    
-                    g_particule_color_data[4*ParticlesCount+0] = p.r;
-                    g_particule_color_data[4*ParticlesCount+1] = p.g;
-                    g_particule_color_data[4*ParticlesCount+2] = p.b;
-                    g_particule_color_data[4*ParticlesCount+3] = p.a;
+            g_particule_position_size_data[4*ParticlesCount+3] = p.size;
             
-                
-                ParticlesCount++;
-                
-            }
-    
-        
+            g_particule_color_data[4*ParticlesCount+0] = p.r;
+            g_particule_color_data[4*ParticlesCount+1] = p.g;
+            g_particule_color_data[4*ParticlesCount+2] = p.b;
+            g_particule_color_data[4*ParticlesCount+3] = p.a;
+            
+            ParticlesCount++;
+        }
         
         printf("%d ",ParticlesCount);
         
@@ -246,10 +223,10 @@ int main( void )
         glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
         glUniform3f(CameraUp_worldspace_ID   , ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
         
-       glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
-
+        // Send our transformation to the currently bound shader,
+        // in the "MVP" uniform
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
         
-       
         // 1rst attribute buffer : vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
@@ -286,6 +263,21 @@ int main( void )
                               (void*)0                          // array buffer offset
                               );
         
+        //Triangle
+        glEnableVertexAttribArray(3);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+                              3,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                              3,                  // size
+                              GL_FLOAT,           // type
+                              GL_FALSE,           // normalized?
+                              0,                  // stride
+                              (void*)0            // array buffer offset
+                              );
+        
+        // Draw the triangle !
+        glDrawArrays(GL_LINE_LOOP, 0, 4); // 6 indices starting at 0 -> 1 triangle
+        
         // These functions are specific to glDrawArrays*Instanced*.
         // The first parameter is the attribute buffer we're talking about.
         // The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
@@ -299,13 +291,12 @@ int main( void )
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(3);
 
-        
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glDisableVertexAttribArray(0);
-        
         
         glfwSwapBuffers(window);
         glfwPollEvents();
