@@ -22,6 +22,7 @@
 
 #include <common/Init.h>
 #include <common/Shader.h>
+#include "Box.h"
 //#include "shader.hpp"
 
 const int MaxParticles = 10000;
@@ -36,8 +37,7 @@ struct Particle{
    };
 
 Particle ParticlesContainer[MaxParticles];
-
-
+Box boxen;
 using namespace glm;
 
 int main( void )
@@ -97,21 +97,6 @@ int main( void )
     static GLfloat* g_particule_position_size_data = new GLfloat[MaxParticles * 4];
     static GLubyte* g_particule_color_data         = new GLubyte[MaxParticles * 4];
     
-    static const GLfloat g_vertex_buffer_data1[] = {
-       
-        -0.7f, 0.7f, 0.0f,
-        
-        -0.7f, -0.7f, 0.0f,
-        
-        0.7f, -0.7f, 0.0f,
-        
-        0.7f, 0.7f, 0.0f,
-    };
-    
-    GLuint vertexbuffer;
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data1), g_vertex_buffer_data1, GL_STATIC_DRAW);
     
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
@@ -158,6 +143,8 @@ int main( void )
         ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
         
         ParticlesContainer[particleIndex].size = 0.1f;
+        
+        boxen = Box();
     }
     
     do{
@@ -170,23 +157,8 @@ int main( void )
         double delta = currentTime - lastTime;
         lastTime = currentTime;
 
-        
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(
-                              0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                              3,                  // size
-                              GL_FLOAT,           // type
-                              GL_FALSE,           // normalized?
-                              0,                  // stride
-                              (void*)0            // array buffer offset
-                              );
-        
-        
-        glDrawArrays(GL_LINE_STRIP, 0, 4);
-        glDisableVertexAttribArray(0);
-
-        int ParticlesCount = 0;
+        boxen.drawBox();
+               int ParticlesCount = 0;
         for(int i=0; i<MaxParticles; i++){
             
             Particle& p = ParticlesContainer[i]; // shortcut
@@ -297,7 +269,6 @@ int main( void )
         
         //Triangle
         glEnableVertexAttribArray(3);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glVertexAttribPointer(
                               3,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
                               3,                  // size
@@ -339,7 +310,7 @@ int main( void )
     delete[] g_particule_position_size_data;
     glfwDestroyWindow(window);
     glfwTerminate();
-    glDeleteBuffers(1, &vertexbuffer);
+    
     glDeleteVertexArrays(1, &VertexArrayID);
     glDeleteBuffers(1, &particles_color_buffer);
     glDeleteBuffers(1, &particles_position_buffer);
