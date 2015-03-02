@@ -84,6 +84,7 @@ int ParticleSystem::updateParticles(double delta){
         
         if(p.pos.y > -0.68f && p.pos.x < 0.68f && p.pos.x > -0.68f)
         {
+            updateCellIndex(p);
             p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.pos += p.speed * (float)delta;
             
@@ -103,6 +104,10 @@ int ParticleSystem::updateParticles(double delta){
             g_particule_color_data[4*ParticlesCount+3] = p.a;
             
             ParticlesCount++;
+            
+            std::cout << p.cellIndex << std::endl;
+            
+        
             
         }
         else
@@ -183,13 +188,18 @@ void ParticleSystem::clean(){
 
 void ParticleSystem::updateCellIndex(Particle& p) {
     
-    float positionX = ceil((p.pos.x * Box::COLS)/Box::BOX_SIZE);
+    float positionX = (p.pos.x * Box::COLS)/Box::BOX_SIZE;
     positionX = positionX + (Box::COLS)/2;
     
-    float positionY = ceil((p.pos.y * Box::ROWS)/Box::BOX_SIZE);
+    float positionY = (p.pos.y * Box::ROWS)/Box::BOX_SIZE;
     positionY = positionY + (Box::ROWS)/2;
     
-    p.cellIndex = positionX*positionY;
+    if (positionY != 0){
+        p.cellIndex = ceil(positionX*positionY);
+    }
+    else{
+        p.cellIndex = ceil(positionX);
+    }
     
     
 }
