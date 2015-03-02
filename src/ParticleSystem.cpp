@@ -173,3 +173,16 @@ void ParticleSystem::clean(){
     glDeleteBuffers(1, &particles_position_buffer);
     glDeleteBuffers(1, &billboard_vertex_buffer);
 }
+
+void ParticleSystem::updateCellIndex(Particle& p) {
+    
+    float positionX = ceil((p.pos.x * Box::COLS)/Box::BOX_SIZE);
+    positionX = positionX + (Box::COLS)/2;
+    
+    float positionY = ceil((p.pos.y * Box::ROWS)/Box::BOX_SIZE);
+    positionY = positionY + (Box::ROWS)/2;
+    
+    p.cellIndex = positionX*positionY;
+    
+    
+}

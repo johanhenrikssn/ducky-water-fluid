@@ -17,7 +17,6 @@ Cell::Cell(int i){
     
 }
 
-
 int& Cell::operator[](int i){
     return index;
 }
@@ -50,25 +49,25 @@ void Cell::clearParticles(){
 void Cell::setNeighbours(int index){
     
     // If index isn't at first column
-    if(index % Box::WIDTH != 0)
+    if(index % Box::COLS  != 0)
     {
         neighbours.push_back(index -1);
     }
     
     //If index isn't at first row
-    if(index > Box::WIDTH){
+    if(index > Box::COLS){
         
-        neighbours.push_back(index - Box::WIDTH);
+        neighbours.push_back(index - Box::COLS);
     }
     
     // If index isn't at last row
-    if (index < Box::WIDTH*Box::HEIGHT-Box::HEIGHT)
+    if (index < Box::COLS*Box::ROWS-Box::ROWS)
     {
-        neighbours.push_back(index + Box::WIDTH);
+        neighbours.push_back(index + Box::COLS);
     }
     
     // If index isn't at last column
-    if((index+1) % Box::WIDTH != 0)
+    if((index+1) % Box::COLS != 0)
     {
         neighbours.push_back(index +1);
     }

@@ -33,7 +33,7 @@ class Grid{
     public:
         
         void initGrid();
-        Cell cells[Box::WIDTH*Box::HEIGHT];
+        Cell cells[Box::COLS*Box::ROWS];
     
     
 };

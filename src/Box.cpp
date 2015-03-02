@@ -25,18 +25,22 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
+const float Box::BOX_POSITIVE = 0.7f;
+const float Box::BOX_NEGATIVE = -0.7f;
+
+const  float Box::BOX_SIZE = 1.4f;
 
 void Box::draw()
 {
     static const GLfloat Boxvertices[] = {
         
-        -0.7f, 0.7f, 0.0f,
+        BOX_NEGATIVE, BOX_POSITIVE, 0.0f,
         
-        -0.7f, -0.7f, 0.0f,
+        BOX_NEGATIVE, BOX_NEGATIVE, 0.0f,
         
-        0.7f, -0.7f, 0.0f,
+        BOX_POSITIVE, BOX_NEGATIVE, 0.0f,
         
-        0.7f, 0.7f, 0.0f,
+        BOX_POSITIVE, BOX_POSITIVE, 0.0f,
     };
     
     GLuint vertexbuffer;

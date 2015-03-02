@@ -19,6 +19,8 @@
 // Include GLFW
 #include <GLFW/glfw3.h>
 
+#include "Box.h"
+
 using namespace glm;
 
 const int MaxParticles = 10000;
@@ -27,6 +29,7 @@ struct Particle{
     vec2 pos, speed, force;
     unsigned char r,g,b,a; // Color
     float size, pressure;
+    int cellIndex;
     
 };
 
@@ -34,7 +37,6 @@ struct Particle{
 class ParticleSystem{
     
     public:
-    
         Particle ParticlesContainer[MaxParticles];
         GLuint particles_position_buffer;
         GLuint particles_color_buffer;
@@ -45,6 +47,7 @@ class ParticleSystem{
         void clean();
         int updateParticles(double delta);
         void initBufferData();
+        void updateCellIndex(Particle& p);
     
     
     
