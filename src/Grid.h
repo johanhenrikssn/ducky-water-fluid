@@ -28,13 +28,25 @@
 using namespace glm;
 
 class Grid{
+    private:
+        Cell cells[GRIDWIDTH*GRIDHEIGHT]
     
-    public:
         int index;
         std::vector<Particle *> particles;
         std::vector<int> neighbours;
     
-        void initCells();
+    public:
+
+        void initCell(int i);
+    
+        void addParticle(Particle& p);
+        std::vector<Particle*> getParticles();
+        void clearParticles();
+        int getIndex() const;
+    
+        void initGrid();
+    
+    
     
 };
 
