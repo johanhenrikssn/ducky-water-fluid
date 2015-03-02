@@ -24,27 +24,18 @@
 
 
 #include "ParticleSystem.h"
+#include "Box.h"
+#include "Cell.h"
 
 using namespace glm;
 
-class Grid{
-    
+class Grid{    
     public:
-        const static int WIDTH = 24;
-        const static int HEIGHT = 24;
         
         void initGrid();
-    
-    private:
-    
-        Cell cells[WIDTH*HEIGHT];
+        Cell cells[Box::WIDTH*Box::HEIGHT];
     
     
-    
-
-
-
-
 };
 
 

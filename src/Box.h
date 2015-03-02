@@ -15,5 +15,8 @@ class Box
     public:
         void draw();
     
+        const static int WIDTH = 24;
+        const static int HEIGHT = 24;
+    
 };
 #endif /* defined(__Ducky_Water__Box__) */

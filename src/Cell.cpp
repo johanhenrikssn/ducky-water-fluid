@@ -10,11 +10,28 @@
 
 
 
-void Cell::initCell(int i){
+Cell::Cell(int i){
     index = i;
     
     setNeighbours(index);
     
+}
+
+
+int& Cell::operator[](int i){
+    return index;
+}
+
+int Cell::operator[](int i) const{
+    return index;
+}
+
+Cell Cell::operator()(int i) {
+    Cell newCell(i);
+    
+    newCell.setNeighbours(i);
+    
+    return(newCell);
 }
 
 void Cell::addParticle(Particle& p){
@@ -29,32 +46,29 @@ void Cell::clearParticles(){
     particles.clear();
 }
 
-int Cell::getIndex() const{
-    return index;
-}
 
 void Cell::setNeighbours(int index){
     
     // If index isn't at first column
-    if(index % Grid::WIDTH != 0)
+    if(index % Box::WIDTH != 0)
     {
         neighbours.push_back(index -1);
     }
     
     //If index isn't at first row
-    if(index > Grid::WIDTH){
+    if(index > Box::WIDTH){
         
-        neighbours.push_back(index - Grid::WIDTH);
+        neighbours.push_back(index - Box::WIDTH);
     }
     
     // If index isn't at last row
-    if (index < Grid::WIDTH*Grid::HEIGHT-Grid::HEIGHT)
+    if (index < Box::WIDTH*Box::HEIGHT-Box::HEIGHT)
     {
-        neighbours.push_back(index + Grid::WIDTH);
+        neighbours.push_back(index + Box::WIDTH);
     }
     
     // If index isn't at last column
-    if((index+1) % Grid::WIDTH != 0)
+    if((index+1) % Box::WIDTH != 0)
     {
         neighbours.push_back(index +1);
     }

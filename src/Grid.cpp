@@ -9,6 +9,7 @@
 #include "Grid.h"
 
 void Grid::initGrid(){
-    for (int i=0; i < WIDTH*HEIGHT; i++) {
-        cells[i].initCell(i);
+    for (int i=0; i < Box::WIDTH*Box::HEIGHT; i++) {
+        cells[i](i);
     }
+}

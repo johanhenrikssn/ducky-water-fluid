@@ -25,25 +25,28 @@
 
 
 #include "ParticleSystem.h"
-#include "Grid.h"
+#include "Box.h"
 
 using namespace glm;
 
 class Cell{
+
+    public:
+    
+        Cell(int i);
+        int& operator[](int i);
+        int operator[](int i) const;
+        Cell operator()(int i);
+    
+        void addParticle(Particle& p);
+        std::vector<Particle*> getParticles();
+        void clearParticles();
+        void setNeighbours(int index);
+    
     private:
         int index;
         std::vector<Particle *> particles;
         std::vector<int> neighbours;
-
-    public:
-
-        void initCell(int i);
-
-        void addParticle(Particle& p);
-        std::vector<Particle*> getParticles();
-        void clearParticles();
-        int getIndex() const;
-        void setNeighbours(int index);
     
     
 };

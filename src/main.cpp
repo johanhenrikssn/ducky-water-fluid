@@ -25,6 +25,7 @@
 #include "Box.h"
 #include "ParticleSystem.h"
 #include "Grid.h"
+#include "Cell.h"
 
 
 GLFWwindow* window;
