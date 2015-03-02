@@ -10,13 +10,20 @@
 
 
 
+// Needs to be cleaned up with proper variables
 void ParticleSystem::initParticles() {
     
-    int newparticles = 10000;
+    int newparticles = 100;
+    int row_counter = 0;
+    double step = 1.2/20;
     
     for(int particleIndex=0; particleIndex<newparticles; particleIndex++){
         
-        ParticlesContainer[particleIndex].pos = glm::vec2((rand()%2000 - 1000.0f)/10000.0f, 1.0f);
+        // For 20 per row
+        if(-0.6+step*(particleIndex % 21) >= 0.6)
+            row_counter++;
+        
+        ParticlesContainer[particleIndex].pos = glm::vec2(-0.6+step*(particleIndex % 21), 1.0f-step*row_counter);
         
         glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
         
