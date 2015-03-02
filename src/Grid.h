@@ -31,10 +31,13 @@ class Grid{
     
     public:
         int index;
+        int width;
+        int height;
         std::vector<Particle *> particles;
         std::vector<int> neighbours;
     
         void initCells();
+        void setNeighbours();
     
 };
 
