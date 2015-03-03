@@ -7,7 +7,6 @@
 //
 
 #include "ParticleSystem.h"
-#include "Grid.h"
 
 
 
@@ -111,12 +110,6 @@ int ParticleSystem::updateParticles(double delta){
             
             ParticlesCount++;
             
-<<<<<<< HEAD
-            
-            
-=======
->>>>>>> e84c3ca99ec8dcdd30a89fbfaf9f4dfa7580d86b
-        
             
         }
         else

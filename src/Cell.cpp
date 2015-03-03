@@ -36,7 +36,7 @@ void Cell::clearParticles(){
 
 double Cell::getGravity(){
     return gravity;
-
+}
 Cell Cell::operator()(int i) {
     Cell newCell(i);
     

@@ -48,7 +48,7 @@ class Cell{
         std::vector<Particle*> getParticles();
         void clearParticles();
         void setNeighbours(int index);
-        double getGravity;
+        double getGravity();
     
         double gravity;
     
