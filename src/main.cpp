@@ -30,7 +30,6 @@
 GLFWwindow* window;
 
 ParticleSystem particleSystem;
-Box box;
 
 using namespace glm;
 
@@ -109,7 +108,7 @@ int main( void )
         double delta = currentTime - lastTime;
         lastTime = currentTime;
         
-        box.draw();
+       
 
         int ParticlesCount = particleSystem.updateParticles(delta);
         

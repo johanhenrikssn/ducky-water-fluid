@@ -49,8 +49,9 @@ class Cell{
         void clearParticles();
         void setNeighbours(int index);
         double getGravity();
+        void setGravity(double g);
     
-        double gravity;
+        double gravity = -0.9f;
     
     private:
         int index;

@@ -13,6 +13,7 @@ Cell::~Cell() {
 }
 
 Cell::Cell(int i){
+    
     index = i;
     
     setNeighbours(index);
@@ -37,6 +38,14 @@ void Cell::clearParticles(){
 double Cell::getGravity(){
     return gravity;
 }
+
+void Cell::setGravity(double g){
+    
+    gravity = g;
+    
+}
+
+
 Cell Cell::operator()(int i) {
     Cell newCell(i);
     
