@@ -14,9 +14,6 @@ Cell::~Cell() {
 
 Cell::Cell(int i){
     index = i;
-    
-    setNeighbours(index);
-    
 }
 
 
@@ -34,14 +31,21 @@ void Cell::clearParticles(){
 }
 
 
-double Cell::getGravity(){
+float Cell::getGravity(){
     return gravity;
 }
+
+float Cell::getPressure() {
+    return pressure;
+}
+
+float Cell::getDensity() {
+    return density;
+}
+
 Cell Cell::operator()(int i) {
     Cell newCell(i);
-    
-    newCell.setNeighbours(i);
-    
+        
     return newCell;
 
 }
@@ -73,4 +77,8 @@ void Cell::setNeighbours(int index){
         neighbours.push_back(index +1);
     }
     
+}
+
+std::vector<int> Cell::getNeighbours() {
+    return neighbours;
 }

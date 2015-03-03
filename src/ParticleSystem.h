@@ -30,7 +30,10 @@ using namespace glm;
 class ParticleSystem{
     
     public:
-        const static int MAX_PARTICLES = 10000;
+        const static int MAX_PARTICLES = 100;
+        const float RADIUS = 4.0f;
+        const float MASS = 0.05f;
+        const float IDEAL_DENSITY = 10;
     
         void initParticles();
         void clean();
@@ -39,6 +42,9 @@ class ParticleSystem{
         void updateCellIndex(Particle& p);
         void initGrid();
         void updateGrid();
+        void calculatePressure(int index);
+        void calculateDensity(int index);
+        void calculateForces(int index);
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];
@@ -46,6 +52,8 @@ class ParticleSystem{
         GLuint particles_color_buffer;
         GLuint billboard_vertex_buffer;
         GLfloat* g_particule_position_size_data;
+    
+    
     
     
     
