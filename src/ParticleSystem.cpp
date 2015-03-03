@@ -24,7 +24,7 @@ void ParticleSystem::initParticles() {
         if(-0.6+step*(particleIndex % 21) >= 0.6)
             row_counter++;
         
-        ParticlesContainer[particleIndex].pos = glm::vec2(-0.6+step*(particleIndex % 21), 1.0f-step*row_counter);
+        ParticlesContainer[particleIndex].pos = glm::vec2(-0.6+step*(particleIndex % 21), 0.7f-step*row_counter);
         
         glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
         
@@ -38,6 +38,7 @@ void ParticleSystem::initParticles() {
         
         ParticlesContainer[particleIndex].size = 0.1f;
     }
+    initGrid();
 }
 
 void ParticleSystem::initBufferData(){
@@ -60,24 +61,25 @@ void ParticleSystem::initBufferData(){
     glGenBuffers(1, &particles_position_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
-    glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
     
     // The VBO containing the colors of the particles
    
     glGenBuffers(1, &particles_color_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
-    glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
     
 }
 
 int ParticleSystem::updateParticles(double delta){
     
-    g_particule_position_size_data = new GLfloat[MaxParticles * 4];
-    static GLubyte* g_particule_color_data         = new GLubyte[MaxParticles * 4];
+    g_particule_position_size_data = new GLfloat[ParticleSystem::MAX_PARTICLES * 4];
+    static GLubyte* g_particule_color_data         = new GLubyte[ParticleSystem::MAX_PARTICLES * 4];
     
     int ParticlesCount = 0;
-    for(int i=0; i<MaxParticles; i++){
+    
+    for(int i=0; i<ParticleSystem::MAX_PARTICLES; i++){
         
         Particle& p = ParticlesContainer[i]; // shortcut
         
@@ -109,8 +111,11 @@ int ParticleSystem::updateParticles(double delta){
             
             ParticlesCount++;
             
+<<<<<<< HEAD
             
             
+=======
+>>>>>>> e84c3ca99ec8dcdd30a89fbfaf9f4dfa7580d86b
         
             
         }
@@ -130,16 +135,20 @@ int ParticleSystem::updateParticles(double delta){
             g_particule_color_data[4*ParticlesCount+3] = p.a;
             ParticlesCount++;
         }
+        
     }
+    
+    updateGrid();
+
     
     
     
     glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-    glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+    glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
     glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLfloat) * 4, g_particule_position_size_data);
     
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-    glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+    glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
     glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLubyte) * 4, g_particule_color_data);
     
     // 1rst attribute buffer : vertices
@@ -197,7 +206,7 @@ void ParticleSystem::updateCellIndex(Particle& p) {
     
     float positionY = (p.pos.y * Box::ROWS)/Box::BOX_SIZE;
     positionY = positionY + (Box::ROWS)/2;
-    
+
     if (positionY != 0){
         p.cellIndex = ceil(positionX*positionY);
     }
@@ -205,5 +214,25 @@ void ParticleSystem::updateCellIndex(Particle& p) {
         p.cellIndex = ceil(positionX);
     }
     
-    
 }
+
+
+void ParticleSystem::initGrid(){
+    for (int i=0; i < Box::ROWS*Box::COLS; i++) {
+        grid[i](i);
+    }
+}
+
+void ParticleSystem::updateGrid(){
+    Cell temp;
+    int tempIndex;
+    
+    //temp = grid[2];
+    //temp.addParticle(ParticlesContainer[1]);
+    
+    for(int i = 0; i < MAX_PARTICLES; i++){
+        tempIndex = ParticlesContainer[i].cellIndex;
+        grid[tempIndex].addParticle(ParticlesContainer[i]);
+    }
+}
+

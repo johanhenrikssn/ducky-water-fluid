@@ -23,20 +23,26 @@
 #include <common/Init.h>
 #include <common/Shader.h>
 
-
-#include "ParticleSystem.h"
 #include "Box.h"
 
 using namespace glm;
 
+
+struct Particle{
+    vec2 pos, speed, force;
+    unsigned char r,g,b,a; // Color
+    float size, pressure;
+    int cellIndex;
+    
+};
+
 class Cell{
 
     public:
-    
+        Cell(){};
         Cell(int i);
-        int& operator[](int i);
-        int operator[](int i) const;
         Cell operator()(int i);
+        ~Cell();
     
         void addParticle(Particle& p);
         std::vector<Particle*> getParticles();
@@ -48,7 +54,7 @@ class Cell{
     
     private:
         int index;
-        std::vector<Particle *> particles;
+        std::vector<Particle*> particles;
         std::vector<int> neighbours;
     
     

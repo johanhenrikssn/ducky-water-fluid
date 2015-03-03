@@ -13,3 +13,5 @@ void Grid::initGrid(){
         cells[i](i);
     }
 }
+
+

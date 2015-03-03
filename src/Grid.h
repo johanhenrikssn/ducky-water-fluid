@@ -25,7 +25,6 @@
 
 #include "ParticleSystem.h"
 #include "Box.h"
-#include "Cell.h"
 
 using namespace glm;
 
@@ -34,6 +33,8 @@ class Grid{
         
         void initGrid();
         Cell cells[Box::COLS*Box::ROWS];
+    
+        void updateCells(Particle ParticlesContainer[]);
     
     
 };
