@@ -45,6 +45,10 @@ void Cell::clearParticles(){
     particles.clear();
 }
 
+double Cell::getGravity(){
+    return gravity;
+}
+
 
 void Cell::setNeighbours(int index){
     

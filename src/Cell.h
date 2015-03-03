@@ -42,11 +42,15 @@ class Cell{
         std::vector<Particle*> getParticles();
         void clearParticles();
         void setNeighbours(int index);
+        double getGravity;
+    
+        double gravity;
     
     private:
         int index;
         std::vector<Particle *> particles;
         std::vector<int> neighbours;
+    
     
     
 };

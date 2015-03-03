@@ -7,6 +7,7 @@
 //
 
 #include "ParticleSystem.h"
+#include "Grid.h"
 
 
 
@@ -85,7 +86,10 @@ int ParticleSystem::updateParticles(double delta){
         if(p.pos.y > -0.68f && p.pos.x < 0.68f && p.pos.x > -0.68f)
         {
             updateCellIndex(p);
-            p.speed -= vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+            
+            // Senare: speed hämtas från den aktuella cellen.
+            p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+            
             p.pos += p.speed * (float)delta;
             
             ParticlesContainer[i].pos -= vec2(0.0f,0.50f) * (float)delta;
@@ -105,7 +109,7 @@ int ParticleSystem::updateParticles(double delta){
             
             ParticlesCount++;
             
-            std::cout << p.cellIndex << std::endl;
+            
             
         
             
