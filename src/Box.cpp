@@ -28,7 +28,7 @@
 const float Box::BOX_POSITIVE = 0.7f;
 const float Box::BOX_NEGATIVE = -0.7f;
 
-const  float Box::BOX_SIZE = 1.4f;
+const  float Box::BOX_SIZE = 2.0f;
 
 void Box::draw()
 {

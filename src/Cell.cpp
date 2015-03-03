@@ -13,6 +13,7 @@ Cell::~Cell() {
 }
 
 Cell::Cell(int i){
+    
     index = i;
 }
 
@@ -41,6 +42,12 @@ float Cell::getPressure() {
 
 float Cell::getDensity() {
     return density;
+}
+
+void Cell::setGravity(float g){
+    
+    gravity = g;
+    
 }
 
 Cell Cell::operator()(int i) {

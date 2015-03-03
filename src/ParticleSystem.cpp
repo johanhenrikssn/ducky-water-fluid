@@ -84,24 +84,23 @@ int ParticleSystem::updateParticles(double delta){
         
         // Simulate simple physics : gravity only, no collisions
         
-        if(p.pos.y > -0.68f && p.pos.x < 0.68f && p.pos.x > -0.68f)
+        if(p.pos.y > -0.8f && p.pos.x < 0.8f && p.pos.x > -0.8f)
         {
             updateCellIndex(p);
             calculateDensity(p.cellIndex);
             calculatePressure(p.cellIndex);
 
             
-            std::cout << p.cellIndex << std::endl;
-            // Senare: speed hämtas från den aktuella cellen.
-            p.speed = vec2(0.0f,grid[p.cellIndex].getGravity()) + vec2(grid[p.cellIndex].getPressure(), grid[p.cellIndex].getPressure()) * (float)delta;
-        
+            //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
+            p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
+            
+            //std::cout << grid[p.cellIndex].getGravity();
+            
             p.pos += p.speed * (float)delta;
             
-            
+            //p.pos -= vec2(0.0f,0.50f) * (float)delta;
             g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
             g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
-            
-            
             
             g_particule_position_size_data[4*ParticlesCount+3] = p.size;
             
@@ -133,7 +132,7 @@ int ParticleSystem::updateParticles(double delta){
         
     }
     
-    updateGrid();
+    //updateGrid();
 
     
     
@@ -196,18 +195,13 @@ void ParticleSystem::clean(){
 
 void ParticleSystem::updateCellIndex(Particle& p) {
     
-    float positionX = (p.pos.x * Box::COLS)/Box::BOX_SIZE;
-    positionX = positionX + (Box::COLS)/2;
+    float positionX = floor((p.pos.x * Box::COLS)/Box::BOX_SIZE);
+    float positionY = floor((p.pos.y * Box::ROWS)/Box::BOX_SIZE);
     
-    float positionY = (p.pos.y * Box::ROWS)/Box::BOX_SIZE;
-    positionY = positionY + (Box::ROWS)/2;
-
-    if (positionY != 0){
-        p.cellIndex = ceil(positionX*positionY);
-    }
-    else{
-        p.cellIndex = ceil(positionX);
-    }
+    positionX = positionX + Box::COLS/2;
+    positionY = Box::ROWS/2 - positionY;
+    
+    p.cellIndex = positionY*Box::COLS+positionX;
     
 }
 
@@ -217,7 +211,7 @@ void ParticleSystem::initGrid(){
         grid[i](i);
     }
     
-
+    
     for (int i=0; i < Box::ROWS*Box::COLS; i++) {
         grid[i].setNeighbours(i);
     }
@@ -232,7 +226,7 @@ void ParticleSystem::updateGrid(){
     
     int tempIndex;
     
-    for(int i = 0; i < MAX_PARTICLES; i++){
+    for(int i = 0; i < 10; i++){
         tempIndex = ParticlesContainer[i].cellIndex;
         grid[tempIndex].addParticle(ParticlesContainer[i]);
     }

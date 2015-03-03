@@ -48,6 +48,7 @@ class Cell{
         std::vector<Particle*> getParticles();
         void clearParticles();
         void setNeighbours(int index);
+
         std::vector<int> getNeighbours();
         float getGravity();
         float getPressure();
@@ -55,8 +56,9 @@ class Cell{
     
         float pressure, density;
         float gravity = -.982;
+        void setGravity(float g);
     
-    private:
+     private:
         int index;
         std::vector<Particle*> particles;
         std::vector<int> neighbours;
