@@ -8,7 +8,9 @@
 
 #include "Cell.h"
 
-
+Cell::~Cell() {
+    particles.clear();
+}
 
 Cell::Cell(int i){
     index = i;
@@ -17,21 +19,7 @@ Cell::Cell(int i){
     
 }
 
-int& Cell::operator[](int i){
-    return index;
-}
 
-int Cell::operator[](int i) const{
-    return index;
-}
-
-Cell Cell::operator()(int i) {
-    Cell newCell(i);
-    
-    newCell.setNeighbours(i);
-    
-    return(newCell);
-}
 
 void Cell::addParticle(Particle& p){
     particles.push_back(&p);
@@ -43,6 +31,14 @@ std::vector<Particle*> Cell::getParticles(){
 
 void Cell::clearParticles(){
     particles.clear();
+}
+
+Cell Cell::operator()(int i) {
+    Cell newCell(i);
+    
+    newCell.setNeighbours(i);
+    
+    return newCell;
 }
 
 

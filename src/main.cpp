@@ -24,8 +24,7 @@
 #include <common/Shader.h>
 #include "Box.h"
 #include "ParticleSystem.h"
-#include "Grid.h"
-#include "Cell.h"
+
 
 
 GLFWwindow* window;
@@ -34,6 +33,8 @@ ParticleSystem particleSystem;
 Box box;
 
 using namespace glm;
+
+
 
 int main( void )
 {
@@ -93,7 +94,10 @@ int main( void )
     particleSystem.initBufferData();
     
     double lastTime = glfwGetTime();
+    
     particleSystem.initParticles();
+   
+    
     
     do{
         int width, height;
@@ -108,7 +112,6 @@ int main( void )
         box.draw();
 
         int ParticlesCount = particleSystem.updateParticles(delta);
-        
         
     
         glEnable(GL_BLEND);
