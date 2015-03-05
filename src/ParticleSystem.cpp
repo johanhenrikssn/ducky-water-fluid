@@ -12,11 +12,11 @@
 // Needs to be cleaned up with proper variables
 void ParticleSystem::initParticles() {
     
-    int newparticles = 100;
+    int newParticles = 100;
     int row_counter = 0;
-    double step = 1.2/2000;
+    double step = 1.2/20;
     
-    for(int particleIndex=0; particleIndex<newparticles; particleIndex++){
+    for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
         // For 20 per row
         if(-0.6+step*(particleIndex % 21) >= 0.6)
@@ -89,14 +89,16 @@ int ParticleSystem::updateParticles(double delta){
             updateCellIndex(p);
             calculateDensity(p.cellIndex);
             calculatePressure(p.cellIndex);
-
+            
+            vec2 tempSpeed = p.speed;
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
-            p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
+            p.speed = vec2(0.0f,grid[p.cellIndex].getGravity())+grid[p.cellIndex].pressure;
             
             //std::cout << grid[p.cellIndex].getGravity();
             
-            p.pos += p.speed * (float)delta;
+            //implement euler
+            p.pos += (p.speed - tempSpeed) / (float)delta;
             
             //p.pos -= vec2(0.0f,0.50f) * (float)delta;
             g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
@@ -132,7 +134,7 @@ int ParticleSystem::updateParticles(double delta){
         
     }
     
-    //updateGrid();
+    updateGrid();
 
     
     
@@ -236,40 +238,37 @@ void ParticleSystem::calculateDensity(int index) {
 
     float density = 0;
    
-    Cell currentCell = grid[index];
-
-    std::vector<Particle*> cellParticles = currentCell.getParticles();
+    std::vector<Particle*> cellParticles = grid[index].getParticles();
     
     for (int i=0; i < cellParticles.size(); i++){
-                std::vector<int> neighbourCells = currentCell.getNeighbours();
+                std::vector<int> neighbourCells = grid[index].getNeighbours();
 
         for(int j = 0; j < neighbourCells.size(); j++) {
-            
+
                 std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
                 //neighbourParticles.insert(neighbourParticles.end(), cellParticles.begin(), cellParticles.end());
                 for(int c = 0; c < neighbourParticles.size(); c++) {
-                    
+
                     Particle *n = neighbourParticles.at(c);
                     vec2 distanceVec = cellParticles.at(i)->pos - n->pos;
                     
                     float distance = length(distanceVec);
                         if(distance < RADIUS) {
+
                         density += MASS*std::powf((std::powf(RADIUS, 2) - std::powf(distance/100, 2)),3);
                     }
             }
         }
-        currentCell.density = density;
+        
+        grid[index].density = density;
         
     }
    // std::cout << density << std::endl;
-    
-   
 
     }
 
 void ParticleSystem::calculatePressure(int index) {
-    Cell currentCell = grid[index];
-    currentCell.pressure = MASS*(IDEAL_DENSITY);
+    grid[index].pressure = MASS*(IDEAL_DENSITY);
     
 }
 
