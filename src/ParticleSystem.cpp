@@ -272,8 +272,44 @@ void ParticleSystem::calculatePressure(int index) {
     
 }
 
+
 void ParticleSystem::calculateForces(int index) {
    // vec2 gravity = vec2(f, -9.82f);
+    
+    std::vector<Particle*> cellParticles = grid[index].getParticles();
+    
+    for (int i=0; i < cellParticles.size(); i++){
+        std::vector<int> neighbourCells = grid[index].getNeighbours();
+        
+        for(int j = 0; j < neighbourCells.size(); j++) {
+            
+            std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
+            //neighbourParticles.insert(neighbourParticles.end(), cellParticles.begin(), cellParticles.end());
+            for(int c = 0; c < neighbourParticles.size(); c++) {
+                
+                Particle *n = neighbourParticles.at(c);
+                vec2 distanceVec = cellParticles.at(i)->pos - n->pos;
+                
+                float distance = length(distanceVec);
+                if(distance < RADIUS) {
+                    
+                    float W_const_pressure = 45.0f/(M_PI * glm::pow(RADIUS, 6.0)) * glm::pow(RADIUS - distance, 3.0) / distance;
+                    
+                    vec2 W_pressure_gradient = vec2(W_const_pressure * distanceVec.x, W_const_pressure * distanceVec.y);
+                    
+                    float visc_gradient = (45/(M_PI * glm::pow(RADIUS, 6.0)))*(RADIUS - distance);
+                    
+                    pressure +=  -MASS * ((grid[index].pressure + grid[n->cellIndex].pressure) / (2 * grid[n->cellIndex].density)) * W_pressure_gradient;
+                    
+                    viscousity += VISCOUSITY * MASS * ((grid[n->cellIndex].oldVelocity - grid[particles[i]!!!!!].oldVelocity) / (grid[n->cellIndex].density)) * visc_gradient;
+                    
+                }
+            }
+        }
+        
+        
+    }
+    // std::cout << density << std::endl;
     
 }
 
