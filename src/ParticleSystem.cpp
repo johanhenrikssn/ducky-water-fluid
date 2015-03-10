@@ -70,7 +70,7 @@ void ParticleSystem::initBufferData(){
     
 }
 
-int ParticleSystem::updateParticles(double delta){
+int ParticleSystem::updateParticles(float delta){
     
     g_particule_position_size_data = new GLfloat[ParticleSystem::MAX_PARTICLES * 4];
     static GLubyte* g_particule_color_data         = new GLubyte[ParticleSystem::MAX_PARTICLES * 4];
@@ -93,7 +93,7 @@ int ParticleSystem::updateParticles(double delta){
         
                        
             //implement euler
-            p.pos += (p.speed) * (float)delta;
+            p.pos += (p.speed) * delta;
         
             collisionHandling();
         
@@ -277,11 +277,11 @@ void ParticleSystem::calculatePressure(int index) {
     
 }
 
-void ParticleSystem::integrationStep(double delta) {
+void ParticleSystem::integrationStep(float delta) {
     
     for(int i = 0; i < MAX_PARTICLES; i++) {
-        ParticlesContainer[i].speed += (float)delta * ParticlesContainer[i].force / ParticlesContainer[i].density;
-        ParticlesContainer[i].pos += (float)delta * ParticlesContainer[i].speed;
+        ParticlesContainer[i].speed += delta * ParticlesContainer[i].force / ParticlesContainer[i].density;
+        ParticlesContainer[i].pos += delta * ParticlesContainer[i].speed;
     }
 }
 

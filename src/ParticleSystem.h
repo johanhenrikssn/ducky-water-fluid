@@ -37,7 +37,7 @@ class ParticleSystem{
     
         void initParticles();
         void clean();
-        int updateParticles(double delta);
+        int updateParticles(float delta);
         void initBufferData();
         void updateCellIndex(Particle& p);
         void initGrid();
@@ -49,7 +49,7 @@ class ParticleSystem{
         vec2 gradKernel(Particle& p);
         float laplaceKernel(Particle &p);
         void collisionHandling();
-        void integrationStep(double delta);
+        void integrationStep(float delta);
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];
