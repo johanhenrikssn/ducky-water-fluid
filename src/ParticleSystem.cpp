@@ -40,7 +40,7 @@ void ParticleSystem::initParticles() {
 }
 
 void ParticleSystem::initBufferData(){
-
+    
     
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
@@ -55,14 +55,14 @@ void ParticleSystem::initBufferData(){
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
     
     // The VBO containing the positions and sizes of the particles
-  
+    
     glGenBuffers(1, &particles_position_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
     glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
     
     // The VBO containing the colors of the particles
-   
+    
     glGenBuffers(1, &particles_color_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
@@ -83,7 +83,7 @@ int ParticleSystem::updateParticles(float delta){
         Particle& p = ParticlesContainer[i]; // shortcut
             updateCellIndex(p);
             calculateDensity(p.cellIndex);
-            calculatePressure(p.cellIndex);
+            calculatePressure();
             
             
             std::cout << p.pressure << std::endl;
@@ -114,7 +114,7 @@ int ParticleSystem::updateParticles(float delta){
             }
     
     updateGrid();
-
+    
     
     
     
@@ -239,7 +239,7 @@ float ParticleSystem::laplaceKernel(Particle &p) {
 }
 
 void ParticleSystem::calculateDensity(int index) {
-
+    
     
     float density = 0;
     
@@ -268,14 +268,17 @@ void ParticleSystem::calculateDensity(int index) {
         grid[index].density = density;
         
     }
-
-}
-
-
-void ParticleSystem::calculatePressure(int index) {
-    grid[index].pressure = MASS*(IDEAL_DENSITY);
     
 }
+
+
+void ParticleSystem::calculatePressure() {
+    for (int i = 0; i < MAX_PARTICLES; i++)
+    {
+        ParticlesContainer[i].pressure = max(STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY), 0.0f);
+    }
+}
+
 
 void ParticleSystem::integrationStep(float delta) {
     
