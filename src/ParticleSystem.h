@@ -40,6 +40,7 @@ class ParticleSystem{
         const float PARTICLE_VOLUME = PARTICLE_SPACING * PARTICLE_SPACING;
         const float PARTICLE_MASS = PARTICLE_VOLUME * REST_DENSITY;
         const float KERNEL_RANGE = 2 * PARTICLE_SPACING;
+        const float ETA = 2500;
 
         void initParticles();
         void clean();
@@ -50,7 +51,7 @@ class ParticleSystem{
         void updateGrid();
         void calculatePressure();
         void calculateDensity();
-        void calculatePressureForce();
+        vec2 calculateTotalForce();
         void calculateViscosityForce();
         float kernel(vec2 p, float h);
         vec2 gradKernel(vec2 p, float h);
