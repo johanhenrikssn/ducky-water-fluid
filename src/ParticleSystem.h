@@ -35,7 +35,7 @@ class ParticleSystem{
         const float MASS = 0.05f;
         const float REST_DENSITY = 1000;
         const float STIFFNESS = 100;
-        const float NUMBER_PARTICLES = MAX_PARTICLES;
+        const float NUMBER_PARTICLES = MAX_PARTICLES/100;
         const float PARTICLE_SPACING = 1.0f / NUMBER_PARTICLES;
         const float PARTICLE_VOLUME = PARTICLE_SPACING * PARTICLE_SPACING;
         const float PARTICLE_MASS = PARTICLE_VOLUME * REST_DENSITY;
@@ -44,9 +44,9 @@ class ParticleSystem{
 
         void initParticles();
         void clean();
-        int updateParticles(float delta);
+        void updateParticles(float delta);
         void initBufferData();
-        void updateCellIndex(Particle& p);
+        void updateCellIndex();
         void initGrid();
         void updateGrid();
         void calculatePressure();
@@ -59,6 +59,7 @@ class ParticleSystem{
         void collisionHandling();
         void integrationStep(float delta);
         void update(float delta);
+        void render();
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];

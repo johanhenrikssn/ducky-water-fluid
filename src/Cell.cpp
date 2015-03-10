@@ -32,24 +32,6 @@ void Cell::clearParticles(){
 }
 
 
-float Cell::getGravity(){
-    return gravity;
-}
-
-float Cell::getPressure() {
-    return pressure;
-}
-
-float Cell::getDensity() {
-    return density;
-}
-
-void Cell::setGravity(float g){
-    
-    gravity = g;
-    
-}
-
 Cell Cell::operator()(int i) {
     Cell newCell(i);
         
@@ -59,6 +41,8 @@ Cell Cell::operator()(int i) {
 
 
 void Cell::setNeighbours(int index){
+   
+    neighbours.push_back(index);
     
     // If index isn't at first column
     if(index % Box::COLS  != 0)
