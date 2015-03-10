@@ -45,6 +45,7 @@ class ParticleSystem{
         void calculatePressure(int index);
         void calculateDensity(int index);
         void calculateForces(int index);
+        float kernel(Particle & p);
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];

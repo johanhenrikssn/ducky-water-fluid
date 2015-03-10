@@ -90,15 +90,14 @@ int ParticleSystem::updateParticles(double delta){
             calculateDensity(p.cellIndex);
             calculatePressure(p.cellIndex);
             
-            vec2 tempSpeed = p.speed;
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.speed = vec2(0.0f,grid[p.cellIndex].getGravity())+grid[p.cellIndex].pressure;
             
-            //std::cout << grid[p.cellIndex].getGravity();
+            std::cout << grid[p.cellIndex].getPressure();
             
             //implement euler
-            p.pos += (p.speed - tempSpeed) / (float)delta;
+            p.pos += (p.speed) * (float)delta;
             
             //p.pos -= vec2(0.0f,0.50f) * (float)delta;
             g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
@@ -272,9 +271,6 @@ void ParticleSystem::calculatePressure(int index) {
     
 }
 
-void ParticleSystem::calculateForces(int index) {
-   // vec2 gravity = vec2(f, -9.82f);
+float ParticleSystem::kernel(Particle &p) {
     
 }
-
-
