@@ -57,6 +57,7 @@ class Cell{
         float pressure, density;
         float gravity = -.982;
         void setGravity(float g);
+        vec2 oldVelocity, newVelocity;
     
      private:
         int index;

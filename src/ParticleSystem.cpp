@@ -40,7 +40,7 @@ void ParticleSystem::initParticles() {
 }
 
 void ParticleSystem::initBufferData(){
-
+    
     
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
@@ -55,14 +55,14 @@ void ParticleSystem::initBufferData(){
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
     
     // The VBO containing the positions and sizes of the particles
-  
+    
     glGenBuffers(1, &particles_position_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
     glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
     
     // The VBO containing the colors of the particles
-   
+    
     glGenBuffers(1, &particles_color_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
@@ -90,6 +90,8 @@ int ParticleSystem::updateParticles(double delta){
             calculateDensity(p.cellIndex);
             calculatePressure();
             
+            
+            std::cout << p.density << std::endl;
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.speed = vec2(0.0f,grid[p.cellIndex].getGravity())+grid[p.cellIndex].pressure;
@@ -134,7 +136,7 @@ int ParticleSystem::updateParticles(double delta){
     }
     
     updateGrid();
-
+    
     
     
     
@@ -232,39 +234,65 @@ void ParticleSystem::updateGrid(){
         grid[tempIndex].addParticle(ParticlesContainer[i]);
     }
 }
+float ParticleSystem::kernel(vec2 p) {
+    float r2 = powf(p.x, 2) + powf(p.y, 2);
+    float h2 = powf(RADIUS, 2);
+    
+    if(r2 < 0 || r2 > h2) return 0.0f;
+    
+    return 315.0f / (64.0f* 3.14f * pow(RADIUS, 9) * powf(h2-r2, 3));
+}
+
+vec2 ParticleSystem::gradKernel(Particle &p) {
+    float r = sqrt(powf(p.pos.x, 2)+powf(p.pos.y, 2));
+    if(r == 0.0f) return vec2(0.0f, 0.0f);
+    
+    float t1 = -45.0f / (3.14f * powf(RADIUS, 6));
+    vec2 t2 = vec2(p.pos.x , p.pos.y)/r;
+    float t3 = powf(RADIUS-r, 2);
+    
+    return t1*t2*t3;
+    
+}
+
+float ParticleSystem::laplaceKernel(Particle &p) {
+    float r = powf(p.pos.x, 2) + powf(p.pos.y, 2);
+    return 45.0f / (M_PI * pow(RADIUS, 6)) * (RADIUS - r);
+}
 
 void ParticleSystem::calculateDensity(int index) {
-
+    
+    
     float density = 0;
-   
+    
     std::vector<Particle*> cellParticles = grid[index].getParticles();
     
     for (int i=0; i < cellParticles.size(); i++){
-                std::vector<int> neighbourCells = grid[index].getNeighbours();
-
+        std::vector<int> neighbourCells = grid[index].getNeighbours();
+        
         for(int j = 0; j < neighbourCells.size(); j++) {
-
-                std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
-                //neighbourParticles.insert(neighbourParticles.end(), cellParticles.begin(), cellParticles.end());
-                for(int c = 0; c < neighbourParticles.size(); c++) {
-
-                    Particle *n = neighbourParticles.at(c);
-                    vec2 distanceVec = cellParticles.at(i)->pos - n->pos;
+            
+            std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
+            //neighbourParticles.insert(neighbourParticles.end(), cellParticles.begin(), cellParticles.end());
+            for(int c = 0; c < neighbourParticles.size(); c++) {
+                
+                Particle *n = neighbourParticles.at(c);
+                vec2 distanceVec = cellParticles.at(i)->pos - n->pos;
+                
+                float distance = length(distanceVec);
+                if(distance < RADIUS) {
                     
-                    float distance = length(distanceVec);
-                        if(distance < RADIUS) {
-
-                        density += MASS*std::powf((std::powf(RADIUS, 2) - std::powf(distance/100, 2)),3);
-                    }
+                    density += MASS*std::powf((std::powf(RADIUS, 2) - std::powf(distance/100, 2)),3);
+                }
             }
         }
         
         grid[index].density = density;
         
     }
-   // std::cout << density << std::endl;
+    
+}
 
-    }
 
 void ParticleSystem::calculatePressure() {
     for (int i = 0; i < MAX_PARTICLES; i++)
@@ -273,6 +301,3 @@ void ParticleSystem::calculatePressure() {
     }
 }
 
-float ParticleSystem::kernel(Particle &p) {
-    
-}
