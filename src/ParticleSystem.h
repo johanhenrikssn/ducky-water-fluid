@@ -45,7 +45,7 @@ class ParticleSystem{
     
         void initParticles();
         void clean();
-        int updateParticles(double delta);
+        int updateParticles(float delta);
         void initBufferData();
         void updateCellIndex(Particle& p);
         void initGrid();
@@ -54,9 +54,11 @@ class ParticleSystem{
         void calculateDensity();
         void calculatePressureForce();
         void calculateViscosityForce();
-        float kernel(vec2 p);
-        vec2 gradKernel(Particle& p);
-        float laplaceKernel(Particle &p);
+        float kernel(vec2 p, float h);
+        vec2 gradKernel(vec2 p, float h);
+        float laplaceKernel(vec2 p, float h);
+        void collisionHandling();
+        void integrationStep(float delta);
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];

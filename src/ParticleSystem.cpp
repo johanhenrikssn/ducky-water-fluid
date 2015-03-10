@@ -14,7 +14,7 @@ void ParticleSystem::initParticles() {
     
     int newParticles = 100;
     int row_counter = 0;
-    double step = 1.2/20;
+    double step = 1.2/200;
     
     for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
@@ -73,7 +73,7 @@ void ParticleSystem::initBufferData(){
     
 }
 
-int ParticleSystem::updateParticles(double delta){
+int ParticleSystem::updateParticles(float delta){
     
     g_particule_position_size_data = new GLfloat[ParticleSystem::MAX_PARTICLES * 4];
     static GLubyte* g_particule_color_data         = new GLubyte[ParticleSystem::MAX_PARTICLES * 4];
@@ -84,26 +84,24 @@ int ParticleSystem::updateParticles(double delta){
     for(int i=0; i<ParticleSystem::MAX_PARTICLES; i++){
         
         Particle& p = ParticlesContainer[i]; // shortcut
-        
-        // Simulate simple physics : gravity only, no collisions
-        
-        if(p.pos.y > -0.8f && p.pos.x < 0.8f && p.pos.x > -0.8f)
-        {
             updateCellIndex(p);
             calculateDensity();
             calculatePressure();
             
             
-            std::cout << p.density << std::endl;
+            std::cout << p.pressure << std::endl;
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
-            p.speed = vec2(0.0f,grid[p.cellIndex].getGravity())+grid[p.cellIndex].pressure;
-            
-            std::cout << grid[p.cellIndex].getPressure();
-            
+            p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
+        
+            std::cout << p.density << std::endl;
+        
+                       
             //implement euler
-            p.pos += (p.speed) * (float)delta;
-            
+            p.pos += (p.speed) * delta;
+        
+            collisionHandling();
+        
             //p.pos -= vec2(0.0f,0.50f) * (float)delta;
             g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
             g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
@@ -118,25 +116,7 @@ int ParticleSystem::updateParticles(double delta){
             ParticlesCount++;
             
             
-        }
-        else
-        {
-            p.speed = vec2(0.0f, 0.0f);
-            g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
-            g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
-            
-            
-            
-            g_particule_position_size_data[4*ParticlesCount+3] = p.size;
-            
-            g_particule_color_data[4*ParticlesCount+0] = p.r;
-            g_particule_color_data[4*ParticlesCount+1] = p.g;
-            g_particule_color_data[4*ParticlesCount+2] = p.b;
-            g_particule_color_data[4*ParticlesCount+3] = p.a;
-            ParticlesCount++;
-        }
-        
-    }
+            }
     
     updateGrid();
     
@@ -237,79 +217,56 @@ void ParticleSystem::updateGrid(){
         grid[tempIndex].addParticle(ParticlesContainer[i]);
     }
 }
-float ParticleSystem::kernel(vec2 p) {
+float ParticleSystem::kernel(vec2 p, float h) {
     float r2 = powf(p.x, 2) + powf(p.y, 2);
-    float h2 = powf(RADIUS, 2);
+    float h2 = powf(h, 2);
     
     if(r2 < 0 || r2 > h2) return 0.0f;
     
     return 315.0f / (64.0f* 3.14f * pow(RADIUS, 9) * powf(h2-r2, 3));
 }
 
-vec2 ParticleSystem::gradKernel(Particle &p) {
-    float r = sqrt(powf(p.pos.x, 2)+powf(p.pos.y, 2));
+vec2 ParticleSystem::gradKernel(vec2 p, float h) {
+    float r = sqrt(powf(p.x, 2)+powf(p.y, 2));
     if(r == 0.0f) return vec2(0.0f, 0.0f);
     
-    float t1 = -45.0f / (3.14f * powf(RADIUS, 6));
-    vec2 t2 = vec2(p.pos.x , p.pos.y)/r;
-    float t3 = powf(RADIUS-r, 2);
+    float t1 = -45.0f / (3.14f * powf(h, 6));
+    vec2 t2 = vec2(p.x , p.y)/r;
+    float t3 = powf(h-r, 2);
     
     return t1*t2*t3;
     
 }
 
-float ParticleSystem::laplaceKernel(Particle &p) {
-    float r = powf(p.pos.x, 2) + powf(p.pos.y, 2);
-    return 45.0f / (M_PI * pow(RADIUS, 6)) * (RADIUS - r);
+float ParticleSystem::laplaceKernel(vec2  p, float h) {
+    float r = powf(p.x, 2) + powf(p.y, 2);
+    return 45.0f / (M_PI * pow(h, 6)) * (h - r);
 }
 
 void ParticleSystem::calculateDensity() {
     float densitySum = 0;
     
-    for (int i=0; i < MAX_PARTICLES; i++){
+    //For each particle
+    for (int i = 0; i < MAX_PARTICLES; i++){
         
+        //Vector with neighbouring cells
         int index = ParticlesContainer[i].cellIndex;
-        
         std::vector<int> neighbourCells = grid[index].getNeighbours();
         
-        for(int j = 0; j < neighbourCells.size(); j++) {
+            for(int j = 0; j < neighbourCells.size(); j++) {
             
-            std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
-            //neighbourParticles.insert(neighbourParticles.end(), cellParticles.begin(), cellParticles.end());
-            for(int c = 0; c < neighbourParticles.size(); c++) {
-                
-                Particle *n = neighbourParticles.at(c);
-                vec2 distanceVec = cellParticles.at(i)->pos - n->pos;
-                
-                float distance = length(distanceVec);
-                if(distance < RADIUS) {
+                //Vector with particles from neighbouring cells
+                std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
+
+                for(int c = 0; c < neighbourParticles.size(); c++) {
                     
-                    densitySum += ;
+                    vec2 deltaRadius = ParticlesContainer[i].pos - neighbourParticles[c]->pos;
+                    densitySum += ParticlesContainer[j].mass * kernel(deltaRadius, KERNEL_RANGE);
                 }
             }
-        }
-        
-        ParticlesContainer[i].density = density;
-        
-    }
-    
-    for (int i = 0; i < MAX_PARTICLES; i++)
-    {
-        float densitySum = 0.0f;
-        vector<int> neighbors = neighborhoods[i];
-        
-        for (int n = 0; n < neighbors.size(); n++)
-        {
-            int j = neighbors[n];
-            
-            vec2 deltaRadius = ParticlesContainer[i].pos - ParticlesContainer[j].pos;
-            densitySum += ParticlesContainer[j].mass * kernel(deltaRadius, KERNEL_RANGE);
-        }
         
         ParticlesContainer[i].density = densitySum;
     }
-}
-    
 }
 
 
@@ -317,6 +274,42 @@ void ParticleSystem::calculatePressure() {
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
         ParticlesContainer[i].pressure = max(STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY), 0.0f);
+    }
+}
+
+
+void ParticleSystem::integrationStep(float delta) {
+    
+    for(int i = 0; i < MAX_PARTICLES; i++) {
+        ParticlesContainer[i].speed += delta * ParticlesContainer[i].force / ParticlesContainer[i].density;
+        ParticlesContainer[i].pos += delta * ParticlesContainer[i].speed;
+    }
+}
+
+void ParticleSystem::collisionHandling() {
+    
+    for(int i = 0; i < MAX_PARTICLES; i++) {
+        if(ParticlesContainer[i].pos.x  < -0.8f)
+        {
+            ParticlesContainer[i].pos.x = -0.8f;
+            ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
+        }
+        else if(ParticlesContainer[i].pos.x > 0.8f)
+        {
+            ParticlesContainer[i].pos.x = 0.8f;
+            ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
+        }
+        
+        if(ParticlesContainer[i].pos.y < -0.8f)
+        {
+            ParticlesContainer[i].pos.y = -0.8f;
+            ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
+        }
+        else if(ParticlesContainer[i].pos.y > 0.8f)
+        {
+            ParticlesContainer[i].pos.y = 0.8f;
+            ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
+        }
     }
 }
 
