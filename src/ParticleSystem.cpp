@@ -14,7 +14,7 @@ void ParticleSystem::initParticles() {
     
     int newParticles = 100;
     int row_counter = 0;
-    double step = 1.2/20;
+    double step = 1.2/200;
     
     for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
@@ -179,18 +179,6 @@ void ParticleSystem::clean(){
     glDeleteBuffers(1, &billboard_vertex_buffer);
 }
 
-void ParticleSystem::update(float delta) {
-    
-    int index = 0;
-    calculateDensity();
-    calculatePressure();
-    //calculateForces(index);
-    integrationStep(delta);
-    collisionHandling();
-    updateGrid();
-    
-}
-
 void ParticleSystem::updateCellIndex(Particle& p) {
     
     float positionX = floor((p.pos.x * Box::COLS)/Box::BOX_SIZE);
@@ -229,8 +217,6 @@ void ParticleSystem::updateGrid(){
         grid[tempIndex].addParticle(ParticlesContainer[i]);
     }
 }
-
-//Poly 6 Kernel
 float ParticleSystem::kernel(vec2 p, float h) {
     float r2 = powf(p.x, 2) + powf(p.y, 2);
     float h2 = powf(h, 2);
@@ -240,7 +226,6 @@ float ParticleSystem::kernel(vec2 p, float h) {
     return 315.0f / (64.0f* 3.14f * pow(RADIUS, 9) * powf(h2-r2, 3));
 }
 
-//Gradient of Spiky Kernel
 vec2 ParticleSystem::gradKernel(vec2 p, float h) {
     float r = sqrt(powf(p.x, 2)+powf(p.y, 2));
     if(r == 0.0f) return vec2(0.0f, 0.0f);
@@ -253,7 +238,6 @@ vec2 ParticleSystem::gradKernel(vec2 p, float h) {
     
 }
 
-//Laplacian of Viscosity Kernel
 float ParticleSystem::laplaceKernel(vec2  p, float h) {
     float r = powf(p.x, 2) + powf(p.y, 2);
     return 45.0f / (M_PI * pow(h, 6)) * (h - r);
@@ -328,4 +312,3 @@ void ParticleSystem::collisionHandling() {
         }
     }
 }
-
