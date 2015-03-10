@@ -33,7 +33,9 @@ class ParticleSystem{
         const static int MAX_PARTICLES = 100;
         const float RADIUS = 4.0f;
         const float MASS = 0.05f;
-        const float IDEAL_DENSITY = 10;
+        const float REST_DENSITY = 1000;
+        const float STIFFNESS = 100;
+
     
         void initParticles();
         void clean();
@@ -42,9 +44,8 @@ class ParticleSystem{
         void updateCellIndex(Particle& p);
         void initGrid();
         void updateGrid();
-        void calculatePressure(int index);
+        void calculatePressure();
         void calculateDensity(int index);
-        void calculateForces(int index);
         float kernel(Particle & p);
     
         Cell grid[Box::COLS*Box::ROWS];

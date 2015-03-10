@@ -88,7 +88,7 @@ int ParticleSystem::updateParticles(double delta){
         {
             updateCellIndex(p);
             calculateDensity(p.cellIndex);
-            calculatePressure(p.cellIndex);
+            calculatePressure();
             
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
@@ -266,9 +266,11 @@ void ParticleSystem::calculateDensity(int index) {
 
     }
 
-void ParticleSystem::calculatePressure(int index) {
-    grid[index].pressure = MASS*(IDEAL_DENSITY);
-    
+void ParticleSystem::calculatePressure() {
+    for (int i = 0; i < MAX_PARTICLES; i++)
+    {
+        ParticlesContainer[i].pressure = max(STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY), 0.0f);
+    }
 }
 
 float ParticleSystem::kernel(Particle &p) {
