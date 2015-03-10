@@ -86,7 +86,7 @@ int ParticleSystem::updateParticles(float delta){
             calculatePressure(p.cellIndex);
             
             
-            std::cout << p.density << std::endl;
+            std::cout << p.pressure << std::endl;
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
@@ -288,25 +288,25 @@ void ParticleSystem::integrationStep(float delta) {
 void ParticleSystem::collisionHandling() {
     
     for(int i = 0; i < MAX_PARTICLES; i++) {
-        if(ParticlesContainer[i].pos.x  < -0.5f)
+        if(ParticlesContainer[i].pos.x  < -0.8f)
         {
-            ParticlesContainer[i].pos.x = -0.5f;
+            ParticlesContainer[i].pos.x = -0.8f;
             ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
         }
-        else if(ParticlesContainer[i].pos.x > 0.5f)
+        else if(ParticlesContainer[i].pos.x > 0.8f)
         {
-            ParticlesContainer[i].pos.x = 0.5f;
+            ParticlesContainer[i].pos.x = 0.8f;
             ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
         }
         
-        if(ParticlesContainer[i].pos.y < -0.5f)
+        if(ParticlesContainer[i].pos.y < -0.8f)
         {
-            ParticlesContainer[i].pos.y = -0.5f;
+            ParticlesContainer[i].pos.y = -0.8f;
             ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
         }
-        else if(ParticlesContainer[i].pos.y > 0.5f)
+        else if(ParticlesContainer[i].pos.y > 0.8f)
         {
-            ParticlesContainer[i].pos.y = 0.5f;
+            ParticlesContainer[i].pos.y = 0.8f;
             ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
         }
     }
