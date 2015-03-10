@@ -35,6 +35,9 @@ void ParticleSystem::initParticles() {
         ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
         
         ParticlesContainer[particleIndex].size = 0.1f;
+        
+        //Give particles mass
+        ParticlesContainer[particleIndex].mass = PARTICLE_MASS;
     }
     initGrid();
 }
@@ -87,7 +90,7 @@ int ParticleSystem::updateParticles(double delta){
         if(p.pos.y > -0.8f && p.pos.x < 0.8f && p.pos.x > -0.8f)
         {
             updateCellIndex(p);
-            calculateDensity(p.cellIndex);
+            calculateDensity();
             calculatePressure();
             
             
@@ -260,14 +263,13 @@ float ParticleSystem::laplaceKernel(Particle &p) {
     return 45.0f / (M_PI * pow(RADIUS, 6)) * (RADIUS - r);
 }
 
-void ParticleSystem::calculateDensity(int index) {
+void ParticleSystem::calculateDensity() {
+    float densitySum = 0;
     
-    
-    float density = 0;
-    
-    std::vector<Particle*> cellParticles = grid[index].getParticles();
-    
-    for (int i=0; i < cellParticles.size(); i++){
+    for (int i=0; i < MAX_PARTICLES; i++){
+        
+        int index = ParticlesContainer[i].cellIndex;
+        
         std::vector<int> neighbourCells = grid[index].getNeighbours();
         
         for(int j = 0; j < neighbourCells.size(); j++) {
@@ -282,14 +284,31 @@ void ParticleSystem::calculateDensity(int index) {
                 float distance = length(distanceVec);
                 if(distance < RADIUS) {
                     
-                    density += MASS*std::powf((std::powf(RADIUS, 2) - std::powf(distance/100, 2)),3);
+                    densitySum += ;
                 }
             }
         }
         
-        grid[index].density = density;
+        ParticlesContainer[i].density = density;
         
     }
+    
+    for (int i = 0; i < MAX_PARTICLES; i++)
+    {
+        float densitySum = 0.0f;
+        vector<int> neighbors = neighborhoods[i];
+        
+        for (int n = 0; n < neighbors.size(); n++)
+        {
+            int j = neighbors[n];
+            
+            vec2 deltaRadius = ParticlesContainer[i].pos - ParticlesContainer[j].pos;
+            densitySum += ParticlesContainer[j].mass * kernel(deltaRadius, KERNEL_RANGE);
+        }
+        
+        ParticlesContainer[i].density = densitySum;
+    }
+}
     
 }
 
