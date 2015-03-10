@@ -14,7 +14,7 @@ void ParticleSystem::initParticles() {
     
     int newParticles = 100;
     int row_counter = 0;
-    double step = 1.2/200;
+    double step = 1.2/20;
     
     for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
@@ -91,7 +91,7 @@ int ParticleSystem::updateParticles(float delta){
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
         
-                       
+
             //implement euler
             p.pos += (p.speed) * delta;
         
@@ -179,7 +179,7 @@ void ParticleSystem::update(float delta) {
     int index = 0;
     calculateDensity(index);
     calculatePressure();
-    calculateForces(index);
+    //calculateForces(index);
     integrationStep(delta);
     collisionHandling();
     updateGrid();
