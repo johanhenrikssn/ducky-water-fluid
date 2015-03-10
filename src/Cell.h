@@ -31,7 +31,7 @@ using namespace glm;
 struct Particle{
     vec2 pos, speed, force;
     unsigned char r,g,b,a; // Color
-    float size, pressure;
+    float size, pressure, density;
     int cellIndex;
     
 };
