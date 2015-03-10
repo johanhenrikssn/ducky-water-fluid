@@ -41,8 +41,6 @@ class ParticleSystem{
         const float PARTICLE_MASS = PARTICLE_VOLUME * REST_DENSITY;
         const float KERNEL_RANGE = 2 * PARTICLE_SPACING;
 
-
-    
         void initParticles();
         void clean();
         int updateParticles(float delta);
@@ -67,11 +65,6 @@ class ParticleSystem{
         GLuint particles_color_buffer;
         GLuint billboard_vertex_buffer;
         GLfloat* g_particule_position_size_data;
-    
-    
-    
-    
-    
 };
 
 #endif /* defined(__Ducky_Water__ParticleSystem__) */

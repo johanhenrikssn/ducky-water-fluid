@@ -52,7 +52,6 @@ void ParticleSystem::initBufferData(){
         
     };
     
-    
     glGenBuffers(1, &billboard_vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
@@ -70,7 +69,6 @@ void ParticleSystem::initBufferData(){
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
     // Initialize with empty (NULL) buffer : it will be updated later, each frame.
     glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
-    
 }
 
 int ParticleSystem::updateParticles(float delta){
@@ -79,7 +77,6 @@ int ParticleSystem::updateParticles(float delta){
     static GLubyte* g_particule_color_data         = new GLubyte[ParticleSystem::MAX_PARTICLES * 4];
     
     int ParticlesCount = 0;
-    
     
     for(int i=0; i<ParticleSystem::MAX_PARTICLES; i++){
         
@@ -96,7 +93,6 @@ int ParticleSystem::updateParticles(float delta){
         
             std::cout << p.density << std::endl;
         
-                       
             //implement euler
             p.pos += (p.speed) * delta;
         
@@ -105,7 +101,6 @@ int ParticleSystem::updateParticles(float delta){
             //p.pos -= vec2(0.0f,0.50f) * (float)delta;
             g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
             g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
-            
             g_particule_position_size_data[4*ParticlesCount+3] = p.size;
             
             g_particule_color_data[4*ParticlesCount+0] = p.r;
@@ -119,9 +114,6 @@ int ParticleSystem::updateParticles(float delta){
             }
     
     updateGrid();
-    
-    
-    
     
     glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
     glBufferData(GL_ARRAY_BUFFER, ParticleSystem::MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
@@ -168,7 +160,6 @@ int ParticleSystem::updateParticles(float delta){
                           );
     
     return ParticlesCount;
-    
 }
 
 void ParticleSystem::clean(){
@@ -196,7 +187,6 @@ void ParticleSystem::initGrid(){
     for (int i=0; i < Box::ROWS*Box::COLS; i++) {
         grid[i](i);
     }
-    
     
     for (int i=0; i < Box::ROWS*Box::COLS; i++) {
         grid[i].setNeighbours(i);
@@ -249,17 +239,18 @@ void ParticleSystem::calculateDensity() {
     //For each particle
     for (int i = 0; i < MAX_PARTICLES; i++){
         
-        //Vector with neighbouring cells
+        //Vector with neightbouring cells to current particle
         int index = ParticlesContainer[i].cellIndex;
         std::vector<int> neighbourCells = grid[index].getNeighbours();
         
+            //For each neighbouring cell
             for(int j = 0; j < neighbourCells.size(); j++) {
             
-                //Vector with particles from neighbouring cells
+                //Vector with particles from current neightbour cell
                 std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
 
+                //For every particle in the neighbouring cell, calculate contribution to density
                 for(int c = 0; c < neighbourParticles.size(); c++) {
-                    
                     vec2 deltaRadius = ParticlesContainer[i].pos - neighbourParticles[c]->pos;
                     densitySum += ParticlesContainer[j].mass * kernel(deltaRadius, KERNEL_RANGE);
                 }
@@ -269,14 +260,12 @@ void ParticleSystem::calculateDensity() {
     }
 }
 
-
 void ParticleSystem::calculatePressure() {
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
         ParticlesContainer[i].pressure = max(STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY), 0.0f);
     }
 }
-
 
 void ParticleSystem::integrationStep(float delta) {
     
