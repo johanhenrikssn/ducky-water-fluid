@@ -13,16 +13,16 @@
 void ParticleSystem::initParticles() {
     
     int newParticles = 1000;
-    int row_counter = 0;
-    double step = 0.06;
+    int rowCounter = 0;
+    float step = 0.05f;
     
     for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
         // For 20 per row
         if(-0.6+step*(particleIndex % 21) >= 0.6)
-            row_counter++;
+            rowCounter++;
         
-        ParticlesContainer[particleIndex].pos = glm::vec2(0.3, 0.3);
+        ParticlesContainer[particleIndex].pos = glm::vec2(-0.6+step*(particleIndex % 21), 0.7f-step*rowCounter);
         
         glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
         
@@ -297,9 +297,11 @@ void ParticleSystem::calculateTotalForce(){
 
 void ParticleSystem::integrationStep(float delta) {
     
+    vec2 gravity =vec2(0.0f, -9.82f);
+    
     for(int i = 0; i < MAX_PARTICLES; i++) {
 
-        ParticlesContainer[i].speed += (((delta +ParticlesContainer[i].force/1000000.0f))/ParticlesContainer[i].density);
+        ParticlesContainer[i].speed += (((delta +ParticlesContainer[i].force/1000000.0f))/ParticlesContainer[i].density)+ gravity;
         ParticlesContainer[i].pos += delta/100 * ParticlesContainer[i].speed;
     }
 }
