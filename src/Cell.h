@@ -24,6 +24,8 @@
 #include <common/Shader.h>
 
 #include "Box.h"
+#include <vector>
+
 
 using namespace glm;
 
@@ -37,29 +39,24 @@ struct Particle{
     
 };
 
-class Cell{
 
-    public:
-        Cell(){};
-        Cell(int i);
-        Cell operator()(int i);
-        ~Cell();
+class Cell {
     
-        void addParticle(Particle& p);
+    public:
+        void CreateCell(int cellIndex);
+        void addParticle(Particle &_particle);
         std::vector<Particle*> getParticles();
         void clearParticles();
-        void setNeighbours(int index);
-
-        std::vector<int> getNeighbours();
-        
-     private:
-        int index;
+        const std::vector<int> &getNeighbours() const;
+        void setNeighbours();
+    
+    private:
         std::vector<Particle*> particles;
         std::vector<int> neighbours;
+        int cellIndex;
     
+
     
     
 };
-
-
 #endif /* defined(__Ducky_Water__Cell__) */

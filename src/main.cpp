@@ -133,8 +133,9 @@ int main( void )
         glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
         glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
         glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
-        glDrawArraysInstanced(GL_POINTS, 0, 1, ParticleSystem::MAX_PARTICLES);
         glEnable(GL_PROGRAM_POINT_SIZE);
+        glDrawArraysInstanced(GL_POINTS, 0, 1, ParticleSystem::MAX_PARTICLES);
+        
         
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);

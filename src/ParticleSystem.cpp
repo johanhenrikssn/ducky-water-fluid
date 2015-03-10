@@ -12,9 +12,9 @@
 // Needs to be cleaned up with proper variables
 void ParticleSystem::initParticles() {
     
-    int newParticles = 100;
+    int newParticles = 1000;
     int row_counter = 0;
-    double step = 1.2/20;
+    double step = 0.06;
     
     for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
@@ -22,7 +22,7 @@ void ParticleSystem::initParticles() {
         if(-0.6+step*(particleIndex % 21) >= 0.6)
             row_counter++;
         
-        ParticlesContainer[particleIndex].pos = glm::vec2(-0.6+step*(particleIndex % 21), 0.7f-step*row_counter);
+        ParticlesContainer[particleIndex].pos = glm::vec2(0.3, 0.3);
         
         glm::vec2 maindir = glm::vec2(0.0f, 0.005f);
         
@@ -137,7 +137,6 @@ void ParticleSystem::render(){
 
 void ParticleSystem::updateParticles(float delta){
     updateGrid();
-    updateCellIndex();
     calculateDensity();
     calculatePressure();
     calculateTotalForce();
@@ -171,11 +170,7 @@ void ParticleSystem::updateCellIndex() {
 void ParticleSystem::initGrid(){
     
     for (int i=0; i < Box::ROWS*Box::COLS; i++) {
-        grid[i](i);
-    }
-    
-    for (int i=0; i < Box::ROWS*Box::COLS; i++) {
-        grid[i].setNeighbours(i);
+        grid[i].CreateCell(i);
     }
     
 }
@@ -230,6 +225,8 @@ void ParticleSystem::calculateDensity() {
         
         //Vector with neightbouring cells to current particle
         int index = ParticlesContainer[i].cellIndex;
+        updateCellIndex();
+
         std::vector<int> neighbourCells = grid[index].getNeighbours();
         
             //For each neighbouring cell
@@ -251,7 +248,7 @@ void ParticleSystem::calculateDensity() {
 void ParticleSystem::calculatePressure() {
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
-        ParticlesContainer[i].pressure = max(STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY), 0.0f);
+        ParticlesContainer[i].pressure = (STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY));
     }
 }
 
@@ -278,9 +275,10 @@ void ParticleSystem::calculateTotalForce(){
             for(int c = 0; c < neighbourParticles.size(); c++) {
                 
                 vec2 deltaRadius = {0.01f, 0.01f};
-                //(2*neighbourParticles[c]->pressure)
+
+                
                 //BLIR DIVISON MED 0 OM DET INTE ÄR STATISKA VÄRDEN. TOKIG PRESSURE-CALC.
-                pressureForce += ParticlesContainer[i].mass * (ParticlesContainer[i].pressure + neighbourParticles[c]->pressure)/vec2(0.5,0.5)*pressforceKernel(deltaRadius, KERNEL_RANGE);
+                pressureForce += ParticlesContainer[i].mass * (ParticlesContainer[i].pressure + neighbourParticles[c]->pressure)/(2*neighbourParticles[c]->pressure)*pressforceKernel(deltaRadius, KERNEL_RANGE);
                 
                 
                 vicosityForce += ETA * ParticlesContainer[i].mass * (neighbourParticles[c]->speed - ParticlesContainer[i].speed)/(neighbourParticles[c]->density)*viscforceKernel(deltaRadius, KERNEL_RANGE);
@@ -292,9 +290,7 @@ void ParticleSystem::calculateTotalForce(){
         
         
         neighbourParticles.clear();
-        
-        ParticlesContainer[i].force = vicosityForce + pressureForce;
-        std::cout << (vicosityForce + pressureForce).x << std::endl;
+        ParticlesContainer[i].force = vicosityForce + pressureForce + vec2(0.0f, -982.f);
            }
     
 }
@@ -302,8 +298,9 @@ void ParticleSystem::calculateTotalForce(){
 void ParticleSystem::integrationStep(float delta) {
     
     for(int i = 0; i < MAX_PARTICLES; i++) {
-        ParticlesContainer[i].speed += delta;//* ParticlesContainer[i].force; /// ParticlesContainer[i].density;
-        ParticlesContainer[i].pos += delta * ParticlesContainer[i].speed;
+
+        ParticlesContainer[i].speed += (((delta +ParticlesContainer[i].force/1000000.0f))/ParticlesContainer[i].density);
+        ParticlesContainer[i].pos += delta/100 * ParticlesContainer[i].speed;
     }
 }
 
@@ -313,23 +310,23 @@ void ParticleSystem::collisionHandling() {
         if(ParticlesContainer[i].pos.x  < -0.5f)
         {
             ParticlesContainer[i].pos.x = -0.5f;
-            ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
+            ParticlesContainer[i].speed.x = -0.8f * ParticlesContainer[i].speed.x;
         }
         else if(ParticlesContainer[i].pos.x > 0.5f)
         {
             ParticlesContainer[i].pos.x = 0.5f;
-            ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
+            ParticlesContainer[i].speed.x = -0.8f * ParticlesContainer[i].speed.x;
         }
         
-        if(ParticlesContainer[i].pos.y < 0.0f)
+        if(ParticlesContainer[i].pos.y < -0.5f)
         {
             ParticlesContainer[i].pos.y = -0.5f;
-            ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
+            ParticlesContainer[i].speed.y = -0.8f * ParticlesContainer[i].speed.y;
         }
         else if(ParticlesContainer[i].pos.y > 0.5f)
         {
             ParticlesContainer[i].pos.y = 0.5f;
-            ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
+            ParticlesContainer[i].speed.y = -0.8f * ParticlesContainer[i].speed.y;
         }
     }
 }

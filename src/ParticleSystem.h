@@ -30,12 +30,12 @@ using namespace glm;
 class ParticleSystem{
     
     public:
-        const static int MAX_PARTICLES = 100;
-        const float RADIUS = 4.0f;
-        const float MASS = 0.05f;
-        const float REST_DENSITY = 1000;
-        const float STIFFNESS = 100;
-        const float NUMBER_PARTICLES = MAX_PARTICLES/100;
+        const static int MAX_PARTICLES = 1000;
+        const float RADIUS = 6.0f;
+        const float MASS = 0.5f;
+        const float REST_DENSITY = 1;
+        const float STIFFNESS = 1000;
+        const float NUMBER_PARTICLES = MAX_PARTICLES;
         const float PARTICLE_SPACING = 1.0f / NUMBER_PARTICLES;
         const float PARTICLE_VOLUME = PARTICLE_SPACING * PARTICLE_SPACING;
         const float PARTICLE_MASS = PARTICLE_VOLUME * REST_DENSITY;
