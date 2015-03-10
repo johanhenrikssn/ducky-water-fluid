@@ -43,9 +43,9 @@ class ParticleSystem{
 
         void initParticles();
         void clean();
-        int updateParticles(float delta);
+        void updateParticles(float delta);
         void initBufferData();
-        void updateCellIndex(Particle& p);
+        void updateCellIndex();
         void initGrid();
         void updateGrid();
         void calculatePressure();
@@ -58,6 +58,7 @@ class ParticleSystem{
         void collisionHandling();
         void integrationStep(float delta);
         void update(float delta);
+        void render();
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];
