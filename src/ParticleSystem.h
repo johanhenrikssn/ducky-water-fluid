@@ -35,6 +35,12 @@ class ParticleSystem{
         const float MASS = 0.05f;
         const float REST_DENSITY = 1000;
         const float STIFFNESS = 100;
+        const float NUMBER_PARTICLES = MAX_PARTICLES;
+        const float PARTICLE_SPACING = 1.0f / NUMBER_PARTICLES;
+        const float PARTICLE_VOLUME = PARTICLE_SPACING * PARTICLE_SPACING;
+        const float PARTICLE_MASS = PARTICLE_VOLUME * REST_DENSITY;
+        const float KERNEL_RANGE = 2 * PARTICLE_SPACING;
+
 
     
         void initParticles();
@@ -45,8 +51,9 @@ class ParticleSystem{
         void initGrid();
         void updateGrid();
         void calculatePressure();
-        void calculateDensity(int index);
-        void calculateForces(int index);
+        void calculateDensity();
+        void calculatePressureForce();
+        void calculateViscosityForce();
         float kernel(vec2 p, float h);
         vec2 gradKernel(vec2 p, float h);
         float laplaceKernel(vec2 p, float h);

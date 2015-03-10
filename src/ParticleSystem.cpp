@@ -35,6 +35,9 @@ void ParticleSystem::initParticles() {
         ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
         
         ParticlesContainer[particleIndex].size = 0.1f;
+        
+        //Give particles mass
+        ParticlesContainer[particleIndex].mass = PARTICLE_MASS;
     }
     initGrid();
 }
@@ -82,7 +85,7 @@ int ParticleSystem::updateParticles(float delta){
         
         Particle& p = ParticlesContainer[i]; // shortcut
             updateCellIndex(p);
-            calculateDensity(p.cellIndex);
+            calculateDensity();
             calculatePressure();
             
             
@@ -91,7 +94,9 @@ int ParticleSystem::updateParticles(float delta){
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
         
-
+            std::cout << p.density << std::endl;
+        
+                       
             //implement euler
             p.pos += (p.speed) * delta;
         
@@ -177,7 +182,7 @@ void ParticleSystem::clean(){
 void ParticleSystem::update(float delta) {
     
     int index = 0;
-    calculateDensity(index);
+    calculateDensity();
     calculatePressure();
     //calculateForces(index);
     integrationStep(delta);
@@ -254,37 +259,30 @@ float ParticleSystem::laplaceKernel(vec2  p, float h) {
     return 45.0f / (M_PI * pow(h, 6)) * (h - r);
 }
 
-void ParticleSystem::calculateDensity(int index) {
+void ParticleSystem::calculateDensity() {
+    float densitySum = 0;
     
-    
-    float density = 0;
-    
-    std::vector<Particle*> cellParticles = grid[index].getParticles();
-    
-    for (int i=0; i < cellParticles.size(); i++){
+    //For each particle
+    for (int i = 0; i < MAX_PARTICLES; i++){
+        
+        //Vector with neighbouring cells
+        int index = ParticlesContainer[i].cellIndex;
         std::vector<int> neighbourCells = grid[index].getNeighbours();
         
-        for(int j = 0; j < neighbourCells.size(); j++) {
+            for(int j = 0; j < neighbourCells.size(); j++) {
             
-            std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
-            //neighbourParticles.insert(neighbourParticles.end(), cellParticles.begin(), cellParticles.end());
-            for(int c = 0; c < neighbourParticles.size(); c++) {
-                
-                Particle *n = neighbourParticles.at(c);
-                vec2 distanceVec = cellParticles.at(i)->pos - n->pos;
-                
-                float distance = length(distanceVec);
-                if(distance < RADIUS) {
+                //Vector with particles from neighbouring cells
+                std::vector<Particle*> neighbourParticles = grid[neighbourCells.at(j)].getParticles();
+
+                for(int c = 0; c < neighbourParticles.size(); c++) {
                     
-                    density += MASS*std::powf((std::powf(RADIUS, 2) - std::powf(distance/100, 2)),3);
+                    vec2 deltaRadius = ParticlesContainer[i].pos - neighbourParticles[c]->pos;
+                    densitySum += ParticlesContainer[j].mass * kernel(deltaRadius, KERNEL_RANGE);
                 }
             }
-        }
         
-        grid[index].density = density;
-        
+        ParticlesContainer[i].density = densitySum;
     }
-    
 }
 
 
