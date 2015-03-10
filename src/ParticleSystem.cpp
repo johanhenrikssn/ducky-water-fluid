@@ -14,7 +14,7 @@ void ParticleSystem::initParticles() {
     
     int newParticles = 100;
     int row_counter = 0;
-    double step = 1.2/20;
+    double step = 1.2/200;
     
     for(int particleIndex=0; particleIndex<newParticles; particleIndex++){
         
@@ -212,30 +212,30 @@ void ParticleSystem::updateGrid(){
         grid[tempIndex].addParticle(ParticlesContainer[i]);
     }
 }
-float ParticleSystem::kernel(vec2 p) {
+float ParticleSystem::kernel(vec2 p, float h) {
     float r2 = powf(p.x, 2) + powf(p.y, 2);
-    float h2 = powf(RADIUS, 2);
+    float h2 = powf(h, 2);
     
     if(r2 < 0 || r2 > h2) return 0.0f;
     
     return 315.0f / (64.0f* 3.14f * pow(RADIUS, 9) * powf(h2-r2, 3));
 }
 
-vec2 ParticleSystem::gradKernel(Particle &p) {
-    float r = sqrt(powf(p.pos.x, 2)+powf(p.pos.y, 2));
+vec2 ParticleSystem::gradKernel(vec2 p, float h) {
+    float r = sqrt(powf(p.x, 2)+powf(p.y, 2));
     if(r == 0.0f) return vec2(0.0f, 0.0f);
     
-    float t1 = -45.0f / (3.14f * powf(RADIUS, 6));
-    vec2 t2 = vec2(p.pos.x , p.pos.y)/r;
-    float t3 = powf(RADIUS-r, 2);
+    float t1 = -45.0f / (3.14f * powf(h, 6));
+    vec2 t2 = vec2(p.x , p.y)/r;
+    float t3 = powf(h-r, 2);
     
     return t1*t2*t3;
     
 }
 
-float ParticleSystem::laplaceKernel(Particle &p) {
-    float r = powf(p.pos.x, 2) + powf(p.pos.y, 2);
-    return 45.0f / (M_PI * pow(RADIUS, 6)) * (RADIUS - r);
+float ParticleSystem::laplaceKernel(vec2  p, float h) {
+    float r = powf(p.x, 2) + powf(p.y, 2);
+    return 45.0f / (M_PI * pow(h, 6)) * (h - r);
 }
 
 void ParticleSystem::calculateDensity(int index) {

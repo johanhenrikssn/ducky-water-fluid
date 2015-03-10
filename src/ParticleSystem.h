@@ -47,9 +47,9 @@ class ParticleSystem{
         void calculatePressure();
         void calculateDensity(int index);
         void calculateForces(int index);
-        float kernel(vec2 p);
-        vec2 gradKernel(Particle& p);
-        float laplaceKernel(Particle &p);
+        float kernel(vec2 p, float h);
+        vec2 gradKernel(vec2 p, float h);
+        float laplaceKernel(vec2 p, float h);
         void collisionHandling();
         void integrationStep(float delta);
     
