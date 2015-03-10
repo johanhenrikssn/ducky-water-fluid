@@ -78,16 +78,17 @@ int ParticleSystem::updateParticles(float delta){
     
     int ParticlesCount = 0;
     
+    
+    
     for(int i=0; i<ParticleSystem::MAX_PARTICLES; i++){
         
         Particle& p = ParticlesContainer[i]; // shortcut
             updateCellIndex(p);
             calculateDensity();
             calculatePressure();
-            vec2 force = calculateTotalForce();
-            
-            
-            std::cout << force.x << std::endl;
+            calculateTotalForce();
+        
+            //std::cout << force.x << std::endl;
             
             //p.speed = vec2(0.0f,-0.00981f) * (float)delta * 0.5f;
             p.speed = vec2(0.0f,grid[p.cellIndex].getGravity());
@@ -110,7 +111,6 @@ int ParticleSystem::updateParticles(float delta){
             g_particule_color_data[4*ParticlesCount+3] = p.a;
             
             ParticlesCount++;
-            
             
             }
     
@@ -208,7 +208,9 @@ void ParticleSystem::updateGrid(){
         grid[tempIndex].addParticle(ParticlesContainer[i]);
     }
 }
-float ParticleSystem::kernel(vec2 p, float h) {
+
+//used in density-calculations
+float ParticleSystem::densKernel(vec2 p, float h) {
     float r2 = powf(p.x, 2) + powf(p.y, 2);
     float h2 = powf(h, 2);
     
@@ -218,7 +220,7 @@ float ParticleSystem::kernel(vec2 p, float h) {
 }
 
 //Pressure-kernel, used in calculatePressureForce
-vec2 ParticleSystem::gradKernel(vec2 p, float h) {
+vec2 ParticleSystem::pressforceKernel(vec2 p, float h) {
     float r = sqrt(powf(p.x, 2)+powf(p.y, 2));
     if(r == 0.0f) return vec2(0.0f, 0.0f);
     
@@ -230,7 +232,7 @@ vec2 ParticleSystem::gradKernel(vec2 p, float h) {
     
 }
 //Viskosity-kernel derivated two times, used in calculateViscosityForce
-float ParticleSystem::laplaceKernel(vec2  p, float h) {
+float ParticleSystem::viscforceKernel(vec2  p, float h) {
     float r = powf(p.x, 2) + powf(p.y, 2);
     return 45.0f / (M_PI * pow(h, 6)) * (h - r);
 }
@@ -254,7 +256,7 @@ void ParticleSystem::calculateDensity() {
                 //For every particle in the neighbouring cell, calculate contribution to density
                 for(int c = 0; c < neighbourParticles.size(); c++) {
                     vec2 deltaRadius = ParticlesContainer[i].pos - neighbourParticles[c]->pos;
-                    densitySum += ParticlesContainer[j].mass * kernel(deltaRadius, KERNEL_RANGE);
+                    densitySum += ParticlesContainer[j].mass * densKernel(deltaRadius, KERNEL_RANGE);
                 }
             }
         
@@ -269,7 +271,7 @@ void ParticleSystem::calculatePressure() {
     }
 }
 
-vec2 ParticleSystem::calculateTotalForce(){
+void ParticleSystem::calculateTotalForce(){
     
     vec2 pressureForce = {0.0f, 0.0f};
     vec2 vicosityForce = {0.0f, 0.0f};
@@ -292,15 +294,15 @@ vec2 ParticleSystem::calculateTotalForce(){
             for(int c = 0; c < neighbourParticles.size(); c++) {
                 vec2 deltaRadius = ParticlesContainer[i].pos - neighbourParticles[c]->pos;
                 
-                pressureForce -= ParticlesContainer[i].mass * (ParticlesContainer[i].pressure + neighbourParticles[c]->pressure)/(2*neighbourParticles[c]->pressure)*gradKernel(deltaRadius, KERNEL_RANGE);
+                pressureForce -= ParticlesContainer[i].mass * (ParticlesContainer[i].pressure + neighbourParticles[c]->pressure)/(2*neighbourParticles[c]->pressure)*pressforceKernel(deltaRadius, KERNEL_RANGE);
                 
                 
-                vicosityForce += ETA * ParticlesContainer[i].mass * (neighbourParticles[c]->speed - ParticlesContainer[i].speed)/(neighbourParticles[c]->density)*laplaceKernel(deltaRadius, KERNEL_RANGE);
+                vicosityForce += ETA * ParticlesContainer[i].mass * (neighbourParticles[c]->speed - ParticlesContainer[i].speed)/(neighbourParticles[c]->density)*viscforceKernel(deltaRadius, KERNEL_RANGE);
                 
             }
         }
         
-        return pressureForce + vicosityForce;
+        ParticlesContainer[i].force = pressureForce + vicosityForce;
     }
     
 }
