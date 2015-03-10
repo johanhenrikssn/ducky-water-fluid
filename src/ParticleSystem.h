@@ -48,6 +48,8 @@ class ParticleSystem{
         float kernel(vec2 p);
         vec2 gradKernel(Particle& p);
         float laplaceKernel(Particle &p);
+        void collisionHandling();
+        void integrationStep(double delta);
     
         Cell grid[Box::COLS*Box::ROWS];
         Particle ParticlesContainer[MAX_PARTICLES];
