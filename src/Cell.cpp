@@ -4,7 +4,7 @@
 
 void Cell::CreateCell(int index) {
     cellIndex = index;
-    setNeighbours();
+    setNeighbours(index);
 }
 
 void Cell::addParticle(Particle &_particle) {
@@ -23,75 +23,34 @@ const std::vector<int> &Cell::getNeighbours() const {
     return neighbours;
 }
 
-void Cell::setNeighbours() {
+void Cell::setNeighbours(int index) {
     
-    neighbours.push_back(cellIndex);
-    switch (cellIndex % Box::COLS) {
-        case 0:
-            if (cellIndex == 0) {
-                neighbours.push_back(cellIndex + 1);
-                neighbours.push_back(cellIndex + Box::COLS);
-                neighbours.push_back(cellIndex + Box::COLS + 1);
-            }
-            else if (cellIndex == Box::ROWS * ( Box::COLS - 1)) {
-                neighbours.push_back(cellIndex + 1);
-                neighbours.push_back(cellIndex - Box::COLS);
-                neighbours.push_back(cellIndex - Box::COLS + 1);
-            }
-            else {
-                neighbours.push_back(cellIndex + 1);
-                neighbours.push_back(cellIndex + Box::COLS);
-                neighbours.push_back(cellIndex - Box::COLS);
-                neighbours.push_back(cellIndex + Box::COLS + 1);
-                neighbours.push_back(cellIndex - Box::COLS + 1);
-            }
-            break;
-        case (Box::COLS - 1):
-            if (cellIndex == Box::COLS - 1) {
-                neighbours.push_back(cellIndex - 1);
-                neighbours.push_back(cellIndex + Box::COLS);
-                neighbours.push_back(cellIndex + Box::COLS - 1);
-            }
-            else if (cellIndex == Box::COLS * Box::ROWS - 1) {
-                neighbours.push_back(cellIndex - 1);
-                neighbours.push_back(cellIndex - Box::COLS);
-                neighbours.push_back(cellIndex - Box::COLS - 1);
-            }
-            else {
-                neighbours.push_back(cellIndex - 1);
-                neighbours.push_back(cellIndex + Box::COLS);
-                neighbours.push_back(cellIndex - Box::COLS);
-                neighbours.push_back(cellIndex + Box::COLS - 1);
-                neighbours.push_back(cellIndex - Box::COLS - 1);
-            }
-            break;
-        default:
-            if (cellIndex < Box::COLS) {
-                neighbours.push_back(cellIndex - 1);
-                neighbours.push_back(cellIndex + 1);
-                neighbours.push_back(cellIndex + Box::COLS - 1);
-                neighbours.push_back(cellIndex + Box::COLS);
-                neighbours.push_back(cellIndex + Box::COLS + 1);
-            }
-            else if (cellIndex > Box::ROWS * (Box::COLS- 1) - 1) {
-                neighbours.push_back(cellIndex - 1);
-                neighbours.push_back(cellIndex + 1);
-                neighbours.push_back(cellIndex - Box::COLS - 1);
-                neighbours.push_back(cellIndex - Box::COLS);
-                neighbours.push_back(cellIndex - Box::COLS + 1);
-            }
-            else {
-                
-                neighbours.push_back(cellIndex - Box::COLS - 1);
-                neighbours.push_back(cellIndex - Box::COLS);
-                neighbours.push_back(cellIndex - Box::COLS + 1);
-                neighbours.push_back(cellIndex - 1);
-                neighbours.push_back(cellIndex + 1);
-                neighbours.push_back(cellIndex + Box::COLS - 1);
-                neighbours.push_back(cellIndex + Box::COLS);
-                neighbours.push_back(cellIndex + Box::COLS + 1);
-            }
-            break;
+    neighbours.push_back(index);
+    
+    // If index isn't at first column
+    if(index % Box::COLS  != 0)
+    {
+        neighbours.push_back(index -1);
     }
+    
+    //If index isn't at first row
+    if(index > Box::COLS){
+        
+        neighbours.push_back(index - Box::COLS);
+    }
+    
+    // If index isn't at last row
+    if (index < Box::COLS*Box::ROWS-Box::ROWS)
+    {
+        neighbours.push_back(index + Box::COLS);
+    }
+    
+    // If index isn't at last column
+    if((index+1) % Box::COLS != 0)
+    {
+        neighbours.push_back(index +1);
+    }
+    
+    
 }
 

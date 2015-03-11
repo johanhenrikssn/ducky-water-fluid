@@ -48,7 +48,7 @@ class Cell {
         std::vector<Particle*> getParticles();
         void clearParticles();
         const std::vector<int> &getNeighbours() const;
-        void setNeighbours();
+        void setNeighbours(int index);
     
     private:
         std::vector<Particle*> particles;

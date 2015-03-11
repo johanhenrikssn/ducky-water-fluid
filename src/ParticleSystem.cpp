@@ -138,7 +138,7 @@ void ParticleSystem::render(){
 void ParticleSystem::updateParticles(float delta){
     updateGrid();
     calculateDensity();
-    calculatePressure();
+    //calculatePressure();
     calculateTotalForce();
     integrationStep(delta);
     collisionHandling();
@@ -219,7 +219,7 @@ float ParticleSystem::viscforceKernel(vec2  p, float h) {
 
 void ParticleSystem::calculateDensity() {
     float densitySum = 0;
-    
+    /*
     //For each particle
     for (int i = 0; i < MAX_PARTICLES; i++){
         
@@ -243,12 +243,60 @@ void ParticleSystem::calculateDensity() {
             }
         ParticlesContainer[i].density = densitySum;
     }
+    
+    */
+    float density_sum = 0;
+    
+    for(int i = 0; i < MAX_PARTICLES; i++){
+        
+        
+        int cellIndex = ParticlesContainer[i].cellIndex;
+        
+        std::vector<int> current_cells = grid[cellIndex].getNeighbours();
+        
+        //std::cout << current_cells.size() << std::endl;
+        
+        for(int j = 0; j < current_cells.size(); j++){
+            
+            // Loop through all neighbouring particles
+            std::vector<Particle*> neighbours = grid[current_cells.at(j)].getParticles();
+            
+            /*
+            // Too many neighbours...
+            if(neighbours.size() > KERNEL_LIMIT)
+                reduceNeighbours(neighbours);
+            */
+            
+            for(int k = 0; k < neighbours.size(); k++){
+                
+                //std::cout << "SIZE " << neighbours.size() << std::endl;
+                
+                //Particle *n = neighbours.at(k);
+                
+                glm::vec2 diffvec = ParticlesContainer[i].pos - neighbours[k]->pos;;
+                
+                float abs_diffvec = glm::length(diffvec);
+                
+                    float h = 16.f;
+                
+                    density_sum += 500*.14f * (315 / (64*M_PI * glm::pow(h, 9.0))) * glm::pow((glm::pow(h, 2.0) - glm::pow(abs_diffvec, 2.f)),3.0);
+                    //cout << "Density: " << PARTICLE_MASS * (315 / (64 * M_PI * glm::pow(h, 9.0))) * glm::pow((glm::pow(h, 2.0) - glm::pow(abs_diffvec, 2.f)), 3.0) << endl;
+                
+                
+            }
+            
+        }
+        ParticlesContainer[i].density = density_sum;
+        ParticlesContainer[i].pressure = (STIFFNESS * (ParticlesContainer[i].density - 1000));
+    }
+    
+    
 }
 
 void ParticleSystem::calculatePressure() {
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
-        ParticlesContainer[i].pressure = (STIFFNESS * (ParticlesContainer[i].density - REST_DENSITY));
+        
     }
 }
 
@@ -287,8 +335,6 @@ void ParticleSystem::calculateTotalForce(){
             
         }
         
-        
-        
         neighbourParticles.clear();
         ParticlesContainer[i].force = vicosityForce + pressureForce + vec2(0.0f, -982.f);
            }
@@ -301,8 +347,8 @@ void ParticleSystem::integrationStep(float delta) {
     
     for(int i = 0; i < MAX_PARTICLES; i++) {
 
-        ParticlesContainer[i].speed += (((delta +ParticlesContainer[i].force/1000000.0f))/ParticlesContainer[i].density)+ gravity;
-        ParticlesContainer[i].pos += delta/100 * ParticlesContainer[i].speed;
+        ParticlesContainer[i].speed += (((delta +ParticlesContainer[i].force))/ParticlesContainer[i].density)+ gravity;
+        ParticlesContainer[i].pos += delta * ParticlesContainer[i].speed;
     }
 }
 
@@ -312,23 +358,23 @@ void ParticleSystem::collisionHandling() {
         if(ParticlesContainer[i].pos.x  < -0.5f)
         {
             ParticlesContainer[i].pos.x = -0.5f;
-            ParticlesContainer[i].speed.x = -0.8f * ParticlesContainer[i].speed.x;
+            ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
         }
         else if(ParticlesContainer[i].pos.x > 0.5f)
         {
             ParticlesContainer[i].pos.x = 0.5f;
-            ParticlesContainer[i].speed.x = -0.8f * ParticlesContainer[i].speed.x;
+            ParticlesContainer[i].speed.x = -0.5f * ParticlesContainer[i].speed.x;
         }
         
         if(ParticlesContainer[i].pos.y < -0.5f)
         {
             ParticlesContainer[i].pos.y = -0.5f;
-            ParticlesContainer[i].speed.y = -0.8f * ParticlesContainer[i].speed.y;
+            ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
         }
         else if(ParticlesContainer[i].pos.y > 0.5f)
         {
             ParticlesContainer[i].pos.y = 0.5f;
-            ParticlesContainer[i].speed.y = -0.8f * ParticlesContainer[i].speed.y;
+            ParticlesContainer[i].speed.y = -0.5f * ParticlesContainer[i].speed.y;
         }
     }
 }
